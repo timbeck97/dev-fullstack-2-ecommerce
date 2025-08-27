@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Routes from "./routes/Routes";
 
 function App() {
   const [msg, setMsg] = useState("");
@@ -11,8 +12,8 @@ function App() {
   }, []);
 
   return (
-    <div style={{ padding: 20 }}>
-      <p>Mensagem do backend: {msg}</p>
+    <div className="bg-gray-100 min-h-screen w-full">
+      <Routes />
     </div>
   );
 }
