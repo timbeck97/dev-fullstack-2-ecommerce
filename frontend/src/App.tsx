@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Routes from "./routes/Routes";
+import { CartProvider } from "./context/CartContext";
 
 function App() {
   const [msg, setMsg] = useState("");
@@ -13,7 +14,10 @@ function App() {
 
   return (
     <div className="bg-gray-100 min-h-screen w-full">
-      <Routes />
+      <CartProvider>
+        <Routes />
+      </CartProvider>
+      
     </div>
   );
 }

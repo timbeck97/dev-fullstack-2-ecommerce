@@ -1,37 +1,18 @@
-import { useEffect, useState } from "react";
-import ProductCard from '../types/ProductCard'
-
-
-interface CartItem extends ProductCard {
-  quantity: number;
-}
+import { useCart } from "../context/CartContext";
 
 export const ShoppingCart = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-
-  // Carrega o carrinho do localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem("shoppingCart");
-    if (stored) {
-      setCartItems(JSON.parse(stored));
-    }
-  }, []);
-
-  // Atualiza o localStorage sempre que cartItems mudar
-  useEffect(() => {
-    localStorage.setItem("shoppingCart", JSON.stringify(cartItems));
-  }, [cartItems]);
+  const { cartItems, removeFromCart, addToCart, totalQuantity } = useCart();
 
   const updateQuantity = (id: number, quantity: number) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item
-      )
-    );
-  };
+    const item = cartItems.find((i) => i.id === id);
+    if (!item) return;
 
-  const removeItem = (id: number) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
+    const diff = quantity - item.quantity;
+    if (diff > 0) {
+      addToCart(item, diff);
+    } else if (diff < 0) {
+      addToCart(item, diff); // dif negativa -> subtrai
+    }
   };
 
   const total = cartItems.reduce(
@@ -79,7 +60,7 @@ export const ShoppingCart = () => {
               </span>
               <button
                 className="text-red-600 hover:underline"
-                onClick={() => removeItem(item.id)}
+                onClick={() => removeFromCart(item.id)}
               >
                 Remover
               </button>

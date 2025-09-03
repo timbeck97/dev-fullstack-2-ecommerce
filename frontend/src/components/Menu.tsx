@@ -1,25 +1,8 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
-interface CartItem {
-  id: number;
-  name: string;
-  price: string;
-  quantity: number;
-}
+import { useCart } from "../context/CartContext"; // hook do CartContext
 
 export const Menu = () => {
-  const [cartQuantity, setCartQuantity] = useState<number>(0);
-
-  // Atualiza a quantidade do carrinho a partir do localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem("shoppingCart");
-    if (stored) {
-      const cart: CartItem[] = JSON.parse(stored);
-      const total = cart.reduce((acc, item) => acc + item.quantity, 0);
-      setCartQuantity(total);
-    }
-  }, []);
+  const { totalQuantity } = useCart(); // pega a quantidade total do carrinho
 
   return (
     <header className="bg-white shadow-md">
@@ -63,9 +46,9 @@ export const Menu = () => {
                 />
               </svg>
 
-              {cartQuantity > 0 && (
+              {totalQuantity > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {cartQuantity}
+                  {totalQuantity}
                 </span>
               )}
             </Link>

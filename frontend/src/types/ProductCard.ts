@@ -2,7 +2,7 @@ import { ProductScent } from "./ProductScent";
 import { ProductSize } from "./ProductSize";
 import { ProductType } from "./ProductType";
 
-export default interface Product {
+export default interface ProductCard {
   id: number;
   name: string;
   description: string;

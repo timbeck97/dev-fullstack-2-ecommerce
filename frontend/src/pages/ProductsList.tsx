@@ -48,7 +48,7 @@ export const ProductsList = () => {
   ];
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center mt-5">
       <div className="grid grid-cols-3 gap-6 max-w-6xl">
         {products.map((product) => (
           <div

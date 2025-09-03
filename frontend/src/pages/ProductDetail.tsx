@@ -1,24 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useCart } from "../context/CartContext"; // hook do CartContext
 import { ProductScent } from "../types/ProductScent";
 import { ProductType } from "../types/ProductType";
 import { ProductSize } from "../types/ProductSize";
+import ProductCard from "../types/ProductCard";
 
-export interface Product {
-  id: number;
-  name: string;
-  description: string;
-  scent: ProductScent;
-  type: ProductType;
-  size: ProductSize;
-  price: string;
-}
 
-interface CartItem extends Product {
-  quantity: number;
-}
-
-const mockProducts: Product[] = [
+const mockProducts: ProductCard[] = [
   {
     id: 1,
     name: "Vela Aromática",
@@ -50,9 +39,10 @@ const mockProducts: Product[] = [
 
 export const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<ProductCard | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const navigate = useNavigate();
+  const { addToCart } = useCart(); // pega a função do contexto
 
   useEffect(() => {
     if (id) {
@@ -61,22 +51,12 @@ export const ProductDetail = () => {
     }
   }, [id]);
 
-  const addToCart = () => {
+  const handleAddToCart = () => {
     if (!product) return;
-
-    const storedCart = localStorage.getItem("shoppingCart");
-    const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
-
-    const existingIndex = cart.findIndex((item) => item.id === product.id);
-    if (existingIndex >= 0) {
-      // Se já existir, soma a quantidade
-      cart[existingIndex].quantity += quantity;
-    } else {
-      cart.push({ ...product, quantity });
+    if(product!=null){
+      addToCart(product,quantity);
+      navigate("/shoppingcart");
     }
-
-    localStorage.setItem("shoppingCart", JSON.stringify(cart));
-    navigate("/shoppingcart");
   };
 
   if (!product) {
@@ -126,7 +106,7 @@ export const ProductDetail = () => {
 
       <button
         className="w-full bg-emerald-600 text-white py-3 rounded-xl hover:bg-emerald-700 transition"
-        onClick={addToCart}
+        onClick={handleAddToCart}
       >
         Adicionar ao Carrinho
       </button>
