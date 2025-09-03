@@ -5,6 +5,8 @@ import { Wrapper } from "../components/Wrapper";
 import { Orders } from "../pages/Orders";
 import { Products } from "../pages/Products";
 import { ProductDetail } from "../pages/ProductDetail";
+import ProductForm from "../pages/ProductForm";
+import { UserForm } from "../pages/UserForm";
 
 const Routes = () => {
     const router = createBrowserRouter(
@@ -12,9 +14,11 @@ const Routes = () => {
             <Route path="/" element={<Wrapper />}>
                 <Route path="/" element={<Products />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/product/manage/:id" element={<ProductForm />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/users" element={<Users />} />
+                <Route path="/users/manage/:id" element={<UserForm />} />
             
 
             </Route>
