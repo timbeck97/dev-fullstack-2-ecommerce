@@ -7,14 +7,18 @@ import { Products } from "../pages/Products";
 import { ProductDetail } from "../pages/ProductDetail";
 import ProductForm from "../pages/ProductForm";
 import { UserForm } from "../pages/UserForm";
+import { ProductsList } from "../pages/ProductsList";
+import { ShoppingCart } from "../pages/ShoppingCart";
 
 const Routes = () => {
     const router = createBrowserRouter(
         createRoutesFromElements(
             <Route path="/" element={<Wrapper />}>
-                <Route path="/" element={<Products />} />
+                <Route path="/" element={<ProductsList />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/product/manage/:id" element={<ProductForm />} />
+                <Route path="/shoppingcart" element={<ShoppingCart />} />
+                <Route path="/manage/product" element={<Products />} />
+                <Route path="/manage/product/:id" element={<ProductForm />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/users" element={<Users />} />

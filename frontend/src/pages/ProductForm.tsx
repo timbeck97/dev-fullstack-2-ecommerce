@@ -1,31 +1,15 @@
 import { useEffect, useState } from "react";
 import CurrencyInput from "react-currency-input-field";
 import { useNavigate, useParams } from "react-router-dom";
+import { ProductType } from "../types/ProductType";
+import { ProductSize } from "../types/ProductSize";
+import { ProductScent } from "../types/ProductScent";
 
-export enum ProductType {
-  VELA = "VELA",
-  DIFUSOR = "DIFUSOR",
-  HOME_SPRAY = "HOME_SPRAY",
-  ESSENCIA = "ESSENCIA",
-}
 
-export enum ProductSize {
-  UNICO = "UNICO",
-  G200 = "200G",
-  G100 = "100G",
-  ML45 = "45ML",
-  ML250 = "250ML",
-  ML500 = "500ML",
-}
 
-export enum ProductScent {
-  BERGAMOTA_ALEGRIM = "BERGAMOTA_ALEGRIM",
-  MANGA_TANGERINA = "MANGA_TANGERINA",
-  CHA_BRANCO = "CHA_BRANCO",
-  CAFE_MARACUJA = "CAFE_MARACUJA",
-  AMENDOAS_CANELA = "AMENDOAS_CANELA",
-  CAPIM_VANILA = "CAPIM_VANILA",
-}
+
+
+
 
 export interface Product {
   id?: number;

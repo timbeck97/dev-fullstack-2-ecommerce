@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Product, ProductType, ProductSize, ProductScent } from "./ProductForm"; // ajuste o import
+import { Product} from "./ProductForm"; // ajuste o import
+import { ProductScent } from "../types/ProductScent";
+import { ProductType } from "../types/ProductType";
+import { ProductSize } from "../types/ProductSize";
 
 export const Products = () => {
   const navigate = useNavigate();
