@@ -25,7 +25,7 @@ export const Menu = () => {
             <Link to="/login" title="Login" className="text-gray-700 hover:text-gray-900">
               Login
             </Link>
-            <Link to="/meus-pedidos" title="Meus pedidos" className="text-gray-700 hover:text-gray-900">
+            <Link to="/orders" title="Meus pedidos" className="text-gray-700 hover:text-gray-900">
               Meus Pedidos
             </Link>
 

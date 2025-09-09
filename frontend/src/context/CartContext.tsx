@@ -1,9 +1,8 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import ProductCard from "../types/ProductCard";
+import CartItem from "../types/CardItem";
 
-export interface CartItem extends ProductCard {
-  quantity: number;
-}
+
 
 interface CartContextType {
   cartItems: CartItem[];

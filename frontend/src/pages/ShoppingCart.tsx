@@ -1,17 +1,17 @@
 import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 export const ShoppingCart = () => {
-  const { cartItems, removeFromCart, addToCart, totalQuantity } = useCart();
+  const { cartItems, removeFromCart, addToCart } = useCart();
+  const navigate = useNavigate();
 
   const updateQuantity = (id: number, quantity: number) => {
     const item = cartItems.find((i) => i.id === id);
     if (!item) return;
 
     const diff = quantity - item.quantity;
-    if (diff > 0) {
+    if (diff !== 0) {
       addToCart(item, diff);
-    } else if (diff < 0) {
-      addToCart(item, diff); // dif negativa -> subtrai
     }
   };
 
@@ -19,6 +19,10 @@ export const ShoppingCart = () => {
     (acc, item) => acc + Number(item.price.replace(",", ".")) * item.quantity,
     0
   );
+
+  const handleCheckout = () => {
+    navigate("/processOrder");
+  };
 
   if (cartItems.length === 0) {
     return (
@@ -69,12 +73,19 @@ export const ShoppingCart = () => {
         ))}
       </div>
 
-      <div className="mt-6 flex justify-between items-center">
+      <div className="mt-6 flex justify-between items-center mb-4">
         <span className="text-xl font-bold">Total:</span>
         <span className="text-xl font-bold text-emerald-600">
           R$ {total.toFixed(2)}
         </span>
       </div>
+
+      <button
+        onClick={handleCheckout}
+        className="w-full bg-emerald-600 text-white py-3 rounded-xl hover:bg-emerald-700 transition"
+      >
+        Finalizar Compra
+      </button>
     </div>
   );
 };

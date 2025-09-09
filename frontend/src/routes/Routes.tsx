@@ -10,6 +10,7 @@ import { UserForm } from "../pages/UserForm";
 import { ProductsList } from "../pages/ProductsList";
 import { ShoppingCart } from "../pages/ShoppingCart";
 import { ClientForm } from "../pages/ClientForm";
+import { ProcessOrder } from "../pages/ProcessOrder";
 
 const Routes = () => {
     const router = createBrowserRouter(
@@ -18,6 +19,7 @@ const Routes = () => {
                 <Route path="/" element={<ProductsList />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/shoppingcart" element={<ShoppingCart />} />
+                <Route path="/processorder" element={<ProcessOrder />} />
                 <Route path="/manage/product" element={<Products />} />
                 <Route path="/manage/product/:id" element={<ProductForm />} />
                 <Route path="/login" element={<Login />} />
