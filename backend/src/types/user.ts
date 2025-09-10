@@ -7,7 +7,6 @@ export default interface User{
       address?: string,
       number?:string,
       email:string,
-      username: string;
       password: string; 
       role: 'ADMIN' | 'USER';
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Routes from "./routes/Routes";
 import { CartProvider } from "./context/CartContext";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   const [msg, setMsg] = useState("");
@@ -14,9 +15,11 @@ function App() {
 
   return (
     <div className="bg-gray-100 min-h-screen w-full">
-      <CartProvider>
-        <Routes />
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <Routes />
+        </CartProvider>
+      </AuthProvider>
       
     </div>
   );

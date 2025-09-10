@@ -1,51 +1,76 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { Product} from "./ProductForm"; // ajuste o import
+
+import { Product } from "./ProductForm"; // ajuste o import
 import { ProductScent } from "../types/ProductScent";
 import { ProductType } from "../types/ProductType";
 import { ProductSize } from "../types/ProductSize";
+import { AuthContext } from "../context/AuthContext";
+import axios from "axios";
 
 export const Products = () => {
   const navigate = useNavigate();
 
+const { user } = useContext(AuthContext);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: 1,
-      name: "Vela Lavanda",
-      description: "Vela aromática",
-      scent: ProductScent.CHA_BRANCO,
-      type: ProductType.VELA,
-      size: ProductSize.G100,
-      price: '49.9',
-    },
-    {
-      id: 2,
-      name: "Difusor Manga",
-      description: "Difusor perfumado",
-      scent: ProductScent.MANGA_TANGERINA,
-      type: ProductType.DIFUSOR,
-      size: ProductSize.ML250,
-      price: '89.9',
-    },
-  ]);
-
-  const handleDelete = (id?: number) => {
-    if (!id) return;
-    setProducts(products.filter((p) => p.id !== id));
+  // -----------------------------
+  // Buscar produtos do backend
+  // -----------------------------
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/produtos");
+      setProducts(response.data);
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao carregar produtos.");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  // -----------------------------
+  // Excluir produto (apenas admin)
+  // -----------------------------
+  const handleDelete = async (id?: number) => {
+    if (!id) return;
+
+  
+
+    try {
+      await axios.delete(`http://localhost:5000/products/${id}`, {
+        headers: { Authorization: `Bearer ${user?.token}` },
+      });
+      setProducts(products.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao excluir produto.");
+    }
+  };
+
+  if (loading) return <div className="p-10 text-center">Carregando produtos...</div>;
+
   return (
-    <div className=" mx-10 mt-10">
+    <div className="mx-10 mt-10">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">Produtos</h2>
+     
         <button
           className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md"
           onClick={() => navigate("/product/manage/novo")}
         >
           Adicionar Novo
         </button>
+     
       </div>
+
+      {error && <div className="text-red-500 mb-4">{error}</div>}
 
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200">
@@ -72,19 +97,19 @@ export const Products = () => {
                 <td className="py-2 px-4 border-b">{p.size}</td>
                 <td className="py-2 px-4 border-b">R$ {p.price}</td>
                 <td className="py-2 px-4 border-b space-x-2">
-                  <button
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md"
-                    onClick={() => navigate(`/product/manage/${p.id}`)}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
-                    onClick={() => handleDelete(p.id)}
-                  >
-                    Excluir
-                  </button>
-                </td>
+                    <button
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md"
+                      onClick={() => navigate(`/product/manage/${p.id}`)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
+                      onClick={() => handleDelete(p.id)}
+                    >
+                      Excluir
+                    </button>
+                  </td>
               </tr>
             ))}
             {products.length === 0 && (

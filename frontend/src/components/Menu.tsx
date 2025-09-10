@@ -1,9 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext"; // hook do CartContext
+import { AuthContext } from "../context/AuthContext";
+import { useContext } from "react";
 
 export const Menu = () => {
   const { totalQuantity } = useCart(); // pega a quantidade total do carrinho
-
+  const { user, isAuthenticated, logout } = useContext(AuthContext);
+  const navigate = useNavigate()
+  const handleLogout = ()=>{
+    logout();
+    navigate('/')
+  }
   return (
     <header className="bg-white shadow-md">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,18 +23,34 @@ export const Menu = () => {
           </div>
 
           <nav className="flex items-center space-x-6">
-            <Link to="/manage/product" title="Gerenciar produtos" className="text-gray-700 hover:text-gray-900">
-              Produtos
-            </Link>
-            <Link to="/users" title="Gerenciar usuários" className="text-gray-700 hover:text-gray-900">
-              Usuários
-            </Link>
-            <Link to="/login" title="Login" className="text-gray-700 hover:text-gray-900">
-              Login
-            </Link>
-            <Link to="/orders" title="Meus pedidos" className="text-gray-700 hover:text-gray-900">
-              Meus Pedidos
-            </Link>
+            {isAuthenticated && user?.role === "ADMIN" && (
+              <>
+                <Link to="/manage/product" title="Gerenciar produtos" className="text-gray-700 hover:text-gray-900">
+                  Produtos
+                </Link>
+                <Link to="/users" title="Gerenciar usuários" className="text-gray-700 hover:text-gray-900">
+                  Usuários
+                </Link>
+              </>
+            )}
+
+            {isAuthenticated &&
+              <Link to="/orders" title="Meus pedidos" className="text-gray-700 hover:text-gray-900">
+                Meus Pedidos
+              </Link>
+
+            }
+            {isAuthenticated ?
+              <button
+                  onClick={handleLogout}
+                  className="text-gray-700 hover:text-gray-900 bg-transparent border-none cursor-pointer"
+                >
+                  Logout
+                </button>:
+                <Link to="/login" title="Login" className="text-gray-700 hover:text-gray-900">
+                Login
+              </Link>}
+
 
             {/* Carrinho */}
             <Link to="/shoppingcart" title="Carrinho de compras" className="relative text-gray-700 hover:text-gray-900">

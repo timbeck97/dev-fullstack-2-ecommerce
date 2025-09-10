@@ -1,32 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { User } from "./UserForm"; // ajuste o caminho conforme seu projeto
+import axios from "axios";
+import { User } from "./UserForm";
+import { AuthContext } from "../context/AuthContext";
 
 export const Users = () => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
-  // Lista de usuários exemplo
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: 1,
-      name: "João",
-      lastName: "Silva",
-      cpf: "123.456.789-00",
-      birthDate: "1990-05-20",
-    },
-    {
-      id: 2,
-      name: "Maria",
-      lastName: "Souza",
-      cpf: "987.654.321-00",
-      birthDate: "1985-12-15",
-    },
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const handleDelete = (id?: number) => {
-    if (!id) return;
-    setUsers(users.filter((u) => u.id !== id));
+  // -----------------------------
+  // Buscar usuários do backend
+  // -----------------------------
+  const fetchUsers = async () => {
+    if (!user) return;
+    try {
+      const response = await axios.get("http://localhost:5000/auth", {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      setUsers(response.data);
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao carregar usuários.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [user]);
+
+
+  const handleDelete = async (id?: number) => {
+    if (!id || !user || user.role !== "ADMIN") return;
+
+    try {
+      await axios.delete(`http://localhost:5000/auth/${id}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      setUsers(users.filter((u) => u.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao excluir usuário.");
+    }
+  };
+
+  if (!user || user.role !== "ADMIN") {
+    return <div className="p-10 text-center text-red-500">Acesso negado. Apenas administradores podem acessar.</div>;
+  }
+
+  if (loading) return <div className="p-10 text-center">Carregando usuários...</div>;
 
   return (
     <div className="mx-10 mt-10">
@@ -39,6 +66,8 @@ export const Users = () => {
           Adicionar Novo
         </button>
       </div>
+
+      {error && <div className="text-red-500 mb-4">{error}</div>}
 
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200">

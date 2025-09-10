@@ -11,7 +11,7 @@ if (!JWT_SECRET) {
 
 interface JwtPayload {
     id: number;
-    username: string;
+    cpf: string;
     role: 'ADMIN' | 'USER';
 }
 

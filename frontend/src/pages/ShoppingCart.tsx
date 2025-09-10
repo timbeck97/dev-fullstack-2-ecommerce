@@ -1,8 +1,11 @@
+import { useContext } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 export const ShoppingCart = () => {
   const { cartItems, removeFromCart, addToCart } = useCart();
+  const { isAuthenticated} = useContext(AuthContext);
   const navigate = useNavigate();
 
   const updateQuantity = (id: number, quantity: number) => {
@@ -21,7 +24,11 @@ export const ShoppingCart = () => {
   );
 
   const handleCheckout = () => {
-    navigate("/processOrder");
+    if(isAuthenticated){
+      navigate("/processOrder");
+    }else{
+      navigate("/login");
+    }
   };
 
   if (cartItems.length === 0) {

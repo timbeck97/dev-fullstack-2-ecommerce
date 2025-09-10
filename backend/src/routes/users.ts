@@ -18,15 +18,14 @@ router.post('/login', (req, res) => {
     const { username, password } = req.body;
 
     const user = db
-        .prepare(`SELECT * FROM users WHERE username = ?`)
-        .get(username) as User | undefined;
+        .prepare(`SELECT * FROM users WHERE email = ? or cpf =?`)
+        .get(username, username) as User | undefined;
     if (!user) return res.status(401).json({ message: 'Usuário não encontrado' });
-
     const validPassword = bcrypt.compareSync(password, user.password);
     if (!validPassword) return res.status(401).json({ message: 'Senha inválida' });
 
     const token = jwt.sign(
-        { id: user.id, username: user.username, role: user.role },
+        { id: user.id, cpf: user.cpf, role: user.role },
         JWT_SECRET,
         { expiresIn: '1h' }
     );
@@ -42,28 +41,27 @@ router.post('/register', authenticateJWT, authorizeRoles('ADMIN'), (req, res) =>
         address,
         number,
         email,
-        username,
         password,
         role
     } = req.body;
 
 
-    if (!name || !lastName || !cpf || !email || !username || !password || !role) {
+    if (!name || !lastName || !cpf || !email ||  !password || !role) {
         return res.status(400).json({ message: 'Campos obrigatórios ausentes' });
     }
 
 
-    const existingUser = db.prepare(`SELECT * FROM users WHERE username = ? OR email = ? OR cpf = ?`)
-        .get(username, email, cpf);
+    const existingUser = db.prepare(`SELECT * FROM users WHERE  email = ? OR cpf = ?`)
+        .get(email, cpf);
     if (existingUser) return res.status(409).json({ message: 'Usuário já existe' });
 
 
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     const result = db.prepare(`
-      INSERT INTO users (name, lastName, cpf, birthDate, address, number, email, username, password, role)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(name, lastName, cpf, birthDate, address, number, email, username, hashedPassword, role);
+      INSERT INTO users (name, lastName, cpf, birthDate, address, number, email, password, role)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(name, lastName, cpf, birthDate, address, number, email,  hashedPassword, role);
 
     res.status(201).json({
         message: 'Usuário criado com sucesso',
@@ -76,7 +74,6 @@ router.post('/register', authenticateJWT, authorizeRoles('ADMIN'), (req, res) =>
             address,
             number,
             email,
-            username,
             role
         }
     });
@@ -90,19 +87,18 @@ router.post('/register-client', (req, res) => {
         address,
         number,
         email,
-        username,
         password
     } = req.body;
 
 
-    if (!name || !lastName || !cpf || !email || !username || !password) {
+    if (!name || !lastName || !cpf || !email ||  !password) {
         return res.status(400).json({ message: 'Campos obrigatórios ausentes' });
     }
 
 
     const existingUser = db.prepare(`
-        SELECT * FROM users WHERE username = ? OR email = ? OR cpf = ?
-    `).get(username, email, cpf) as User | undefined;
+        SELECT * FROM users WHERE  email = ? OR cpf = ?
+    `).get(email, cpf) as User | undefined;
 
     if (existingUser) return res.status(409).json({ message: 'Usuário já existe' });
 
@@ -113,9 +109,9 @@ router.post('/register-client', (req, res) => {
     const role: 'USER' = 'USER';
 
     const result = db.prepare(`
-      INSERT INTO users (name, lastName, cpf, birthDate, address, number, email, username, password, role)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(name, lastName, cpf, birthDate, address, number, email, username, hashedPassword, role);
+      INSERT INTO users (name, lastName, cpf, birthDate, address, number, email, password, role)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(name, lastName, cpf, birthDate, address, number, email, hashedPassword, role);
 
     res.status(201).json({
         message: 'Usuário criado com sucesso',
@@ -128,14 +124,13 @@ router.post('/register-client', (req, res) => {
             address,
             number,
             email,
-            username,
             role
         }
     });
 });
 router.get('/', authenticateJWT, authorizeRoles('ADMIN'), (req, res) => {
     const users = db.prepare(`
-    SELECT id, name, lastName, cpf, birthDate, address, number, email, username, role 
+    SELECT id, name, lastName, cpf, birthDate, address, number, email, role 
     FROM users
 `).all() as User[];
     res.json(users);
@@ -143,7 +138,7 @@ router.get('/', authenticateJWT, authorizeRoles('ADMIN'), (req, res) => {
 router.get('/:id', authenticateJWT, authorizeRoles('ADMIN'), (req, res) => {
     const { id } = req.params;
     const user = db.prepare(`
-        SELECT id, name, lastName, cpf, birthDate, address, number, email, username, role 
+        SELECT id, name, lastName, cpf, birthDate, address, number, email,  role 
         FROM users 
         WHERE id = ?
     `).get(id) as User | undefined;
@@ -170,7 +165,6 @@ router.put('/:id', authenticateJWT, authorizeRoles('ADMIN'), (req, res) => {
         address,
         number,
         email,
-        username,
         password,
         role
     } = req.body;
@@ -182,7 +176,7 @@ router.put('/:id', authenticateJWT, authorizeRoles('ADMIN'), (req, res) => {
 
     db.prepare(`
         UPDATE users
-        SET name = ?, lastName = ?, cpf = ?, birthDate = ?, address = ?, number = ?, email = ?, username = ?, password = ?, role = ?
+        SET name = ?, lastName = ?, cpf = ?, birthDate = ?, address = ?, number = ?, email = ?, password = ?, role = ?
         WHERE id = ?
     `).run(
         name || existingUser.name,
@@ -192,14 +186,13 @@ router.put('/:id', authenticateJWT, authorizeRoles('ADMIN'), (req, res) => {
         address || existingUser.address,
         number || existingUser.number,
         email || existingUser.email,
-        username || existingUser.username,
         hashedPassword,
         role || existingUser.role,
         id
     );
 
     const updatedUser = db.prepare(`
-        SELECT id, name, lastName, cpf, birthDate, address, number, email, username, role 
+        SELECT id, name, lastName, cpf, birthDate, address, number, email, role 
         FROM users 
         WHERE id = ?
     `).get(id) as User;
