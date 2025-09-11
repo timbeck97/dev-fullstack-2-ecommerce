@@ -37,7 +37,7 @@ export const ProcessOrder = () => {
   }, []);
 
   const total = cartItems.reduce(
-    (acc, item) => acc + Number(item.price.replace(",", ".")) * item.quantity,
+    (acc, item) => acc + Number(item.price) * item.quantity,
     0
   );
 
@@ -70,7 +70,7 @@ export const ProcessOrder = () => {
               </div>
               <div className="text-right">
                 <span className="font-bold text-emerald-600">
-                  R$ {(Number(item.price.replace(",", ".")) * item.quantity).toFixed(2)}
+                  R$ {(Number(item.price) * item.quantity).toFixed(2)}
                 </span>
                 <p className="text-sm text-gray-500">Qtd: {item.quantity}</p>
               </div>

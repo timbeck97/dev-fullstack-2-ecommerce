@@ -5,37 +5,10 @@ import { ProductScent } from "../types/ProductScent";
 import { ProductType } from "../types/ProductType";
 import { ProductSize } from "../types/ProductSize";
 import ProductCard from "../types/ProductCard";
+import axios from "axios";
 
 
-const mockProducts: ProductCard[] = [
-  {
-    id: 1,
-    name: "Vela Aromática",
-    description: "Vela artesanal com aroma refrescante.",
-    scent: ProductScent.BERGAMOTA_ALEGRIM,
-    type: ProductType.VELA,
-    size: ProductSize.G200,
-    price: "39,90",
-  },
-  {
-    id: 2,
-    name: "Difusor de Ambientes",
-    description: "Perfuma o ambiente por até 60 dias.",
-    scent: ProductScent.MANGA_TANGERINA,
-    type: ProductType.DIFUSOR,
-    size: ProductSize.ML250,
-    price: "59,90",
-  },
-  {
-    id: 3,
-    name: "Home Spray",
-    description: "Ideal para perfumar pequenos ambientes.",
-    scent: ProductScent.CHA_BRANCO,
-    type: ProductType.HOME_SPRAY,
-    size: ProductSize.ML45,
-    price: "29,90",
-  },
-];
+
 
 export const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -46,11 +19,18 @@ export const ProductDetail = () => {
 
   useEffect(() => {
     if (id) {
-      const found = mockProducts.find((p) => p.id === Number(id));
-      setProduct(found || null);
+      fetchProduct(id);
     }
   }, [id]);
-
+    const fetchProduct= async (id:string) => {
+    try {
+      const response = await axios.get("http://localhost:5000/produtos/"+id);
+      console.log('response product', response)
+      setProduct(response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const handleAddToCart = () => {
     if (!product) return;
     if(product!=null){
@@ -62,7 +42,7 @@ export const ProductDetail = () => {
   if (!product) {
     return (
       <div className="text-center text-xl mt-10 text-red-500">
-        Produto não encontrado
+       
       </div>
     );
   }

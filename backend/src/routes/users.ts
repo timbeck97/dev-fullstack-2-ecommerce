@@ -199,5 +199,18 @@ router.put('/:id', authenticateJWT, authorizeRoles('ADMIN'), (req, res) => {
 
     res.json({ message: 'Usuário atualizado com sucesso', user: updatedUser });
 });
+router.get('/me', authenticateJWT, (req, res) => {
+  const userId = (req as any).user?.id;
+  if (!userId) return res.status(401).json({ message: 'Token inválido ou expirado' });
 
+  const user = db.prepare(`
+    SELECT id, name, lastName, cpf, birthDate, address, number, email, role 
+    FROM users 
+    WHERE id = ?
+  `).get(userId) as User | undefined;
+
+  if (!user) return res.status(404).json({ message: 'Usuário não encontrado' });
+
+  res.json(user);
+});
 export default router;

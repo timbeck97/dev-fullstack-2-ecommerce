@@ -1,51 +1,27 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product } from "./ProductForm";
 import { ProductScent } from "../types/ProductScent";
 import { ProductType } from "../types/ProductType";
 import { ProductSize } from "../types/ProductSize";
+import axios from "axios";
 
 export const ProductsList = () => {
   const navigate = useNavigate();
+  const [products, setProducts] = useState<Product[]>([]);
 
-  const products: Product[] = [
-    {
-      id: 1,
-      name: "Vela Aromática",
-      description: "Vela artesanal com aroma refrescante.",
-      scent: ProductScent.BERGAMOTA_ALEGRIM,
-      type: ProductType.VELA,
-      size: ProductSize.G200,
-      price: "39,90",
-    },
-    {
-      id: 2,
-      name: "Difusor de Ambientes",
-      description: "Perfuma o ambiente por até 60 dias.",
-      scent: ProductScent.MANGA_TANGERINA,
-      type: ProductType.DIFUSOR,
-      size: ProductSize.ML250,
-      price: "59,90",
-    },
-    {
-      id: 3,
-      name: "Home Spray",
-      description: "Ideal para perfumar pequenos ambientes.",
-      scent: ProductScent.CHA_BRANCO,
-      type: ProductType.HOME_SPRAY,
-      size: ProductSize.ML45,
-      price: "29,90",
-    },
-    {
-      id: 4,
-      name: "Essência Concentrada",
-      description: "Para difusores elétricos ou aromatizadores.",
-      scent: ProductScent.AMENDOAS_CANELA,
-      type: ProductType.ESSENCIA,
-      size: ProductSize.ML500,
-      price: "49,90",
-    },
-  ];
+    useEffect(() => {
+      fetchProducts();
+    }, []);
+   const fetchProducts = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/produtos");
+      setProducts(response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   return (
     <div className="flex justify-center mt-5">
@@ -78,7 +54,7 @@ export const ProductsList = () => {
               <button
                 className="bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition"
                 onClick={(e) => {
-                  e.stopPropagation(); // impede clique duplo (card + botão)
+                  e.stopPropagation(); 
                   navigate(`/product/${product.id}`);
                 }}
               >

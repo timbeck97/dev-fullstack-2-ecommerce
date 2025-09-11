@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
-import CurrencyInput from "react-currency-input-field";
 import { useNavigate, useParams } from "react-router-dom";
 import { ProductType } from "../types/ProductType";
 import { ProductSize } from "../types/ProductSize";
 import { ProductScent } from "../types/ProductScent";
+import axiosApi from "../service/axiosService";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import CurrencyInput from "react-currency-input-field";
+
 
 
 
@@ -21,9 +24,9 @@ export interface Product {
   price: string;
 }
 
-function ProductForm() {
+export const ProductForm = () => {
   const { id } = useParams<{ id: string }>();
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product>({
     name: "",
     description: "",
@@ -34,23 +37,41 @@ function ProductForm() {
   });
 
   useEffect(() => {
-    if (id && id !== "novo") {
-      const numericId = parseInt(id, 10);
+    if (id && id === "novo") {
       const fetchedProduct: Product = {
-        id: numericId,
-        name: "Produto Exemplo",
-        description: "Descrição do produto",
+        name: "",
+        description: "",
         scent: ProductScent.MANGA_TANGERINA,
         type: ProductType.DIFUSOR,
         size: ProductSize.G200,
         price: '',
       };
       setProduct(fetchedProduct);
+    } else {
+      if (id) {
+        fetchProduct(id)
+      }
     }
   }, [id]);
-  const handleSave = () => {
-    console.log(product)
-  }
+  const fetchProduct = async (id: string) => {
+    try {
+      const response = await axios.get<Product>("http://localhost:5000/produtos/" + id);
+      console.log('response product', response.data)
+      setProduct({...response.data, price:String(response.data.price)});
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const handleSave = async () => {
+    try {
+      const response = await axiosApi.post("/produtos", product);
+      console.log("Produto salvo com sucesso:", response.data);
+      navigate("/manage/product");
+    } catch (error) {
+      console.error("Erro ao salvar produto:", error);
+      alert("Erro ao salvar produto, verifique os dados.");
+    }
+  };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setProduct((prev) => ({
@@ -59,24 +80,26 @@ function ProductForm() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Salvar produto:", product);
+  const handlePriceChange = (value?: string) => {
+    value = value?.replace(',','.');
+    setProduct((prev) => ({
+      ...prev,
+      price: value || "",
+    }));
   };
-
   return (
     <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
       <button
         className="mb-4 text-gray-600 hover:text-gray-800 font-medium"
-        onClick={() => navigate("/users")}
+        onClick={() => navigate("/manage/product")}
       >
         Voltar
       </button>
       <h2 className="text-2xl font-semibold mb-6 text-center">
         {id === "novo" ? "Novo Produto" : "Editar Produto"}
       </h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Nome */}
+      <form className="space-y-4">
+
         <div>
           <label className="block mb-1 font-medium text-gray-700">Nome</label>
           <input
@@ -87,7 +110,7 @@ function ProductForm() {
           />
         </div>
 
-        {/* Descrição */}
+
         <div>
           <label className="block mb-1 font-medium text-gray-700">Descrição</label>
           <input
@@ -98,7 +121,7 @@ function ProductForm() {
           />
         </div>
 
-        {/* Aroma */}
+
         <div>
           <label className="block mb-1 font-medium text-gray-700">Aroma</label>
           <select
@@ -115,7 +138,7 @@ function ProductForm() {
           </select>
         </div>
 
-        {/* Tipo */}
+
         <div>
           <label className="block mb-1 font-medium text-gray-700">Tipo</label>
           <select
@@ -132,7 +155,7 @@ function ProductForm() {
           </select>
         </div>
 
-        {/* Tamanho */}
+
         <div>
           <label className="block mb-1 font-medium text-gray-700">Tamanho</label>
           <select
@@ -149,24 +172,24 @@ function ProductForm() {
           </select>
         </div>
 
-        {/* Preço */}
-        <CurrencyInput
-          id="price"
-          name="price"
-          placeholder="R$ 0,00"
-          value={product.price}
-          decimalsLimit={2}
-          decimalSeparator=","
-          groupSeparator="."
-          prefix="R$ "
-          onValueChange={(value) => {
-            setProduct((prev) => ({ ...prev, price: value || '' }));
+        <div>
+          <label className="block mb-1 font-medium text-gray-700">Preço</label>
+          <CurrencyInput
+            id="price"
+            name="price"
+            placeholder="R$ 0,00"
+            value={product.price.replace('.',',')}
+            decimalsLimit={2}
+            decimalScale={2}
+            decimalSeparator=","
+            groupSeparator="."
+            prefix="R$ "
+            onValueChange={handlePriceChange}
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
 
-          }}
-          className="w-full border border-gray-300 rounded-md p-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
 
-        {/* Botão */}
         <button
           type="button"
           onClick={handleSave}
@@ -179,4 +202,3 @@ function ProductForm() {
   );
 }
 
-export default ProductForm;

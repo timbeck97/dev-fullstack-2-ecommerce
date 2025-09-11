@@ -5,12 +5,12 @@ import { Wrapper } from "../components/Wrapper";
 import { Orders } from "../pages/Orders";
 import { Products } from "../pages/Products";
 import { ProductDetail } from "../pages/ProductDetail";
-import ProductForm from "../pages/ProductForm";
 import { UserForm } from "../pages/UserForm";
 import { ProductsList } from "../pages/ProductsList";
 import { ShoppingCart } from "../pages/ShoppingCart";
 import { ClientForm } from "../pages/ClientForm";
 import { ProcessOrder } from "../pages/ProcessOrder";
+import { ProductForm } from "../pages/ProductForm";
 
 const Routes = () => {
     const router = createBrowserRouter(

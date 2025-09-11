@@ -1,11 +1,14 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import axiosApi from "../service/axiosService";
+import { User } from "./UserForm";
 
 export const ShoppingCart = () => {
   const { cartItems, removeFromCart, addToCart } = useCart();
-  const { isAuthenticated} = useContext(AuthContext);
+  const [user, setUser] = useState<User>()
+  const { isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const updateQuantity = (id: number, quantity: number) => {
@@ -17,16 +20,16 @@ export const ShoppingCart = () => {
       addToCart(item, diff);
     }
   };
-
+ 
   const total = cartItems.reduce(
-    (acc, item) => acc + Number(item.price.replace(",", ".")) * item.quantity,
+    (acc, item) => acc + Number(item.price) * item.quantity,
     0
   );
 
   const handleCheckout = () => {
-    if(isAuthenticated){
+    if (isAuthenticated) {
       navigate("/processOrder");
-    }else{
+    } else {
       navigate("/login");
     }
   };
@@ -67,7 +70,7 @@ export const ShoppingCart = () => {
                 className="w-16 border rounded-lg p-1 text-center"
               />
               <span className="font-bold text-emerald-600">
-                R$ {(Number(item.price.replace(",", ".")) * item.quantity).toFixed(2)}
+                R$ {(Number(item.price) * item.quantity).toFixed(2)}
               </span>
               <button
                 className="text-red-600 hover:underline"

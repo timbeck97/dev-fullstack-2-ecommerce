@@ -7,6 +7,7 @@ import { ProductType } from "../types/ProductType";
 import { ProductSize } from "../types/ProductSize";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
+import axiosApi from "../service/axiosService";
 
 export const Products = () => {
   const navigate = useNavigate();
@@ -35,22 +36,16 @@ const { user } = useContext(AuthContext);
     fetchProducts();
   }, []);
 
-  // -----------------------------
-  // Excluir produto (apenas admin)
-  // -----------------------------
+
   const handleDelete = async (id?: number) => {
     if (!id) return;
 
-  
-
     try {
-      await axios.delete(`http://localhost:5000/products/${id}`, {
+      await axiosApi.delete(`http://localhost:5000/produtos/${id}`, {
         headers: { Authorization: `Bearer ${user?.token}` },
       });
       setProducts(products.filter((p) => p.id !== id));
     } catch (err) {
-      console.error(err);
-      alert("Erro ao excluir produto.");
     }
   };
 
@@ -63,7 +58,7 @@ const { user } = useContext(AuthContext);
      
         <button
           className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md"
-          onClick={() => navigate("/product/manage/novo")}
+          onClick={() => navigate("/manage/product/novo")}
         >
           Adicionar Novo
         </button>
@@ -99,7 +94,7 @@ const { user } = useContext(AuthContext);
                 <td className="py-2 px-4 border-b space-x-2">
                     <button
                       className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md"
-                      onClick={() => navigate(`/product/manage/${p.id}`)}
+                      onClick={() => navigate(`/manage/product/${p.id}`)}
                     >
                       Editar
                     </button>
