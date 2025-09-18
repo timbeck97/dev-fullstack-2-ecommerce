@@ -70,7 +70,7 @@ export const ProcessOrder = () => {
       });
       clearCart();
       navigate("/");
-      
+
     } catch (err) {
       console.error(err);
       alert("Erro ao finalizar pedido.");
@@ -78,15 +78,17 @@ export const ProcessOrder = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-2xl shadow-md">
-      <h1 className="text-2xl font-bold mb-6">Finalizar Pedido</h1>
+    <div className="max-w-4xl mx-auto mt-10 p-4 sm:p-6 bg-white rounded-2xl shadow-md">
+      <h1 className="text-2xl font-bold mb-6 text-center sm:text-left">Finalizar Pedido</h1>
 
-      <div className="mb-6 flex justify-between">
+      {/* Passos */}
+      <div className="mb-6 flex flex-col sm:flex-row justify-between gap-2 sm:gap-0 text-center sm:text-left">
         <span className={`font-bold ${step === 1 ? "text-emerald-600" : ""}`}>1. Pedido</span>
         <span className={`font-bold ${step === 2 ? "text-emerald-600" : ""}`}>2. Entrega</span>
         <span className={`font-bold ${step === 3 ? "text-emerald-600" : ""}`}>3. Pagamento</span>
       </div>
 
+      {/* Etapa 1 - Pedido */}
       {step === 1 && (
         <div className="flex flex-col gap-4">
           {cartItems.map((item) => {
@@ -94,23 +96,28 @@ export const ProcessOrder = () => {
             const totalItem = unitPrice * item.quantity;
 
             return (
-              <div key={item.id} className="flex justify-between border-b pb-2">
-                <div>
-                  <h2 className="font-semibold">{item.name}</h2>
-                  <p className="text-sm text-gray-500">
-                    {item.type} | {item.size} | {item.scent}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Valor unitário: <span className="font-medium">R$ {unitPrice.toFixed(2)}</span>
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Quantidade: <span className="font-medium">{item.quantity}</span>
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="font-bold text-emerald-600">
-                    Total: R$ {totalItem.toFixed(2)}
-                  </span>
+              <div
+                key={item.id}
+                className="flex flex-col sm:flex-row justify-between border-b pb-2 gap-2"
+              >
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-1">
+                  <div className="flex-1">
+                    <h2 className="font-semibold">{item.name}</h2>
+                    <p className="text-sm text-gray-500 truncate">
+                      {item.type} | {item.size} | {item.scent}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Valor unitário: <span className="font-medium">R$ {unitPrice.toFixed(2)}</span>
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Quantidade: <span className="font-medium">{item.quantity}</span>
+                    </p>
+                  </div>
+                  <div className="text-right sm:text-right">
+                    <span className="font-bold text-emerald-600">
+                      Total: R$ {totalItem.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
@@ -121,6 +128,7 @@ export const ProcessOrder = () => {
         </div>
       )}
 
+      {/* Etapa 2 - Cliente */}
       {step === 2 && clientData && (
         <div className="flex flex-col gap-3">
           <p><span className="font-medium">Nome:</span> {clientData.name}</p>
@@ -130,43 +138,47 @@ export const ProcessOrder = () => {
         </div>
       )}
 
+      {/* Etapa 3 - Pagamento */}
       {step === 3 && (
         <div className="flex flex-col gap-4">
           <p className="font-medium mb-2">Dados de Pagamento</p>
-          <input
-            type="text"
-            placeholder="Número do cartão"
-            value={paymentData.cardNumber}
-            onChange={(e) => setPaymentData({ ...paymentData, cardNumber: e.target.value })}
-            className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-          <input
-            type="text"
-            placeholder="Nome no cartão"
-            value={paymentData.cardName}
-            onChange={(e) => setPaymentData({ ...paymentData, cardName: e.target.value })}
-            className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              placeholder="Número do cartão"
+              value={paymentData.cardNumber}
+              onChange={(e) => setPaymentData({ ...paymentData, cardNumber: e.target.value })}
+              className="border border-gray-300 rounded-lg p-2 flex-1 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+            <input
+              type="text"
+              placeholder="Nome no cartão"
+              value={paymentData.cardName}
+              onChange={(e) => setPaymentData({ ...paymentData, cardName: e.target.value })}
+              className="border border-gray-300 rounded-lg p-2 flex-1 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
               placeholder="MM/AA"
               value={paymentData.expiry}
               onChange={(e) => setPaymentData({ ...paymentData, expiry: e.target.value })}
-              className="border border-gray-300 rounded-lg p-2 w-24 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="border border-gray-300 rounded-lg p-2 w-full sm:w-24 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <input
               type="text"
               placeholder="CVV"
               value={paymentData.cvv}
               onChange={(e) => setPaymentData({ ...paymentData, cvv: e.target.value })}
-              className="border border-gray-300 rounded-lg p-2 w-24 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="border border-gray-300 rounded-lg p-2 w-full sm:w-24 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
         </div>
       )}
 
-      <div className="mt-6 flex justify-between">
+      {/* Botões de navegação */}
+      <div className="mt-6 flex flex-col sm:flex-row justify-between gap-2">
         {step > 1 && (
           <button
             onClick={prevStep}
@@ -175,25 +187,24 @@ export const ProcessOrder = () => {
             Voltar
           </button>
         )}
-
         {step < 3 && (
           <button
             onClick={nextStep}
-            className="bg-emerald-600 text-white py-2 px-4 rounded-xl hover:bg-emerald-700 transition ml-auto"
+            className="bg-emerald-600 text-white py-2 px-4 rounded-xl hover:bg-emerald-700 transition sm:ml-auto"
           >
             Próximo
           </button>
         )}
-
         {step === 3 && (
           <button
             onClick={handleConfirmOrder}
-            className="bg-emerald-600 text-white py-2 px-4 rounded-xl hover:bg-emerald-700 transition ml-auto"
+            className="bg-emerald-600 text-white py-2 px-4 rounded-xl hover:bg-emerald-700 transition sm:ml-auto"
           >
             Finalizar Pedido
           </button>
         )}
       </div>
     </div>
+
   );
 };
