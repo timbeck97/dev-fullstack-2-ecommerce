@@ -50,6 +50,7 @@ export const Login = () => {
               id="email"
               type="email"
               required
+              autoComplete="username"
               value={userLogin}
               onChange={(e) => setUserLogin(e.target.value)}
               className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -65,6 +66,7 @@ export const Login = () => {
               type="password"
               required
               value={password}
+              autoComplete="current-password"
               onChange={(e) => setPassword(e.target.value)}
               className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />

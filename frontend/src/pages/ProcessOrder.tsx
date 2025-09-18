@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import axiosApi from "../service/axiosService";
 
 interface CartItem {
   id: number;
@@ -21,11 +22,25 @@ interface ClientData {
   email: string;
 }
 
+interface PaymentData {
+  cardNumber: string;
+  cardName: string;
+  expiry: string;
+  cvv: string;
+}
+
 export const ProcessOrder = () => {
   const [step, setStep] = useState(1);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [clientData, setClientData] = useState<ClientData | null>(null);
-  const {clearCart} = useCart()
+  const [paymentData, setPaymentData] = useState<PaymentData>({
+    cardNumber: "",
+    cardName: "",
+    expiry: "",
+    cvv: "",
+  });
+
+  const { clearCart } = useCart();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,10 +59,22 @@ export const ProcessOrder = () => {
   const nextStep = () => setStep((prev) => Math.min(prev + 1, 3));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
-  const handleConfirmOrder = () => {
-    alert("Pedido finalizado! Obrigado pela compra.");
-    clearCart()
-    navigate("/");
+  const handleConfirmOrder = async () => {
+    try {
+      await axiosApi.post("/order", {
+        items: cartItems.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+        })),
+        paymentData,
+      });
+      clearCart();
+      navigate("/");
+      
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao finalizar pedido.");
+    }
   };
 
   return (
@@ -62,22 +89,34 @@ export const ProcessOrder = () => {
 
       {step === 1 && (
         <div className="flex flex-col gap-4">
-          {cartItems.map((item) => (
-            <div key={item.id} className="flex justify-between border-b pb-2">
-              <div>
-                <h2 className="font-semibold">{item.name}</h2>
-                <p className="text-sm text-gray-500">{item.type} | {item.size} | {item.scent}</p>
+          {cartItems.map((item) => {
+            const unitPrice = Number(item.price);
+            const totalItem = unitPrice * item.quantity;
+
+            return (
+              <div key={item.id} className="flex justify-between border-b pb-2">
+                <div>
+                  <h2 className="font-semibold">{item.name}</h2>
+                  <p className="text-sm text-gray-500">
+                    {item.type} | {item.size} | {item.scent}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Valor unitário: <span className="font-medium">R$ {unitPrice.toFixed(2)}</span>
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Quantidade: <span className="font-medium">{item.quantity}</span>
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="font-bold text-emerald-600">
+                    Total: R$ {totalItem.toFixed(2)}
+                  </span>
+                </div>
               </div>
-              <div className="text-right">
-                <span className="font-bold text-emerald-600">
-                  R$ {(Number(item.price) * item.quantity).toFixed(2)}
-                </span>
-                <p className="text-sm text-gray-500">Qtd: {item.quantity}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
           <div className="mt-4 text-right text-xl font-bold text-emerald-600">
-            Total: R$ {total.toFixed(2)}
+            Total do Pedido: R$ {total.toFixed(2)}
           </div>
         </div>
       )}
@@ -97,22 +136,30 @@ export const ProcessOrder = () => {
           <input
             type="text"
             placeholder="Número do cartão"
+            value={paymentData.cardNumber}
+            onChange={(e) => setPaymentData({ ...paymentData, cardNumber: e.target.value })}
             className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
           <input
             type="text"
             placeholder="Nome no cartão"
+            value={paymentData.cardName}
+            onChange={(e) => setPaymentData({ ...paymentData, cardName: e.target.value })}
             className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
           <div className="flex gap-2">
             <input
               type="text"
               placeholder="MM/AA"
+              value={paymentData.expiry}
+              onChange={(e) => setPaymentData({ ...paymentData, expiry: e.target.value })}
               className="border border-gray-300 rounded-lg p-2 w-24 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <input
               type="text"
               placeholder="CVV"
+              value={paymentData.cvv}
+              onChange={(e) => setPaymentData({ ...paymentData, cvv: e.target.value })}
               className="border border-gray-300 rounded-lg p-2 w-24 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
