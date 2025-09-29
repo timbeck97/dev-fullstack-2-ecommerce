@@ -6,6 +6,7 @@ export default interface Product{
       name: string;
       description: string;
       scent: string;
+      imageUrl?:string;
       type: ProductType;
       size: ProductSize;
       price: number;

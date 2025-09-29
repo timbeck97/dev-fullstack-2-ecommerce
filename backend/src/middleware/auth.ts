@@ -36,7 +36,8 @@ export const authorizeRoles = (...roles: ('ADMIN' | 'USER')[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
         const user = (req as any).user;
         if (!roles.includes(user.role)) {
-            return res.status(403).json({ message: 'Acesso negado' });
+            console.log(user.role)
+            return res.status(403).json({ message: 'Acesso negado, seu usuário não tem permissão para executar essa ação' });
         }
         next();
     };

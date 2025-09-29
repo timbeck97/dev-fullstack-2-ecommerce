@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { User } from "./UserForm";
 import { AuthContext } from "../context/AuthContext";
+import { UserFormData } from "../types/UserFormData";
 
 export const Users = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserFormData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -35,14 +36,14 @@ export const Users = () => {
   }, [user]);
 
 
-  const handleDelete = async (id?: number) => {
+  const handleDelete = async (id?: string) => {
     if (!id || !user || user.role !== "ADMIN") return;
 
     try {
       await axios.delete(`http://localhost:5000/auth/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      setUsers(users.filter((u) => u.id !== id));
+      setUsers(users.filter((u) => u.id && u.id !== id));
     } catch (err) {
       console.error(err);
       alert("Erro ao excluir usuário.");
@@ -75,9 +76,8 @@ export const Users = () => {
             <tr>
               <th className="py-2 px-4 border-b">ID</th>
               <th className="py-2 px-4 border-b">Nome</th>
-              <th className="py-2 px-4 border-b">Sobrenome</th>
               <th className="py-2 px-4 border-b">CPF</th>
-              <th className="py-2 px-4 border-b">Data de Nascimento</th>
+              <th className="py-2 px-4 border-b">Endereço</th>
               <th className="py-2 px-4 border-b">Ações</th>
             </tr>
           </thead>
@@ -86,9 +86,8 @@ export const Users = () => {
               <tr key={u.id} className="hover:bg-gray-50">
                 <td className="py-2 px-4 border-b">{u.id}</td>
                 <td className="py-2 px-4 border-b">{u.name}</td>
-                <td className="py-2 px-4 border-b">{u.lastName}</td>
                 <td className="py-2 px-4 border-b">{u.cpf}</td>
-                <td className="py-2 px-4 border-b">{u.birthDate}</td>
+                <td className="py-2 px-4 border-b">{u.street+', '+u.number+' - '+u.neighborhood}</td>
                 <td className="py-2 px-4 border-b space-x-2">
                   <button
                     className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md"

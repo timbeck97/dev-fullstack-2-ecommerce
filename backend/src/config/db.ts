@@ -12,9 +12,12 @@ db.prepare(`
     name TEXT NOT NULL,
     lastName TEXT NOT NULL,
     cpf TEXT UNIQUE NOT NULL,
-    birthDate TEXT,
-    address TEXT,
+    street TEXT,
     number TEXT,
+    city TEXT,
+    neighborhood TEXT,
+    state TEXT,
+    cep TEXT,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     role TEXT NOT NULL
@@ -26,32 +29,54 @@ const adminExists = db.prepare(`SELECT * FROM users WHERE email = ?`).get('admin
 if (!adminExists) {
   const hashedPassword = bcrypt.hashSync('teste123', 10);
   db.prepare(`
-      INSERT INTO users (name, lastName, cpf, email, password, role)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run('Admin', 'User', '00000000000', 'admin@admin.com', hashedPassword, 'ADMIN');
+    INSERT INTO users (name, lastName, cpf, street, number,neighborhood, city, state, cep, email, password, role)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    'Admin', 
+    'User', 
+    '00000000000', 
+    'Av. Paulista', 
+    '1000', 
+    'Centro',
+    'São Paulo', 
+    'SP', 
+    '01000-000', 
+    'admin@admin.com', 
+    hashedPassword, 
+    'ADMIN'
+  );
 }
-const userExists = db.prepare(`SELECT * FROM users WHERE email = ?`).get('user@user.com');
 
+
+const userExists = db.prepare(`SELECT * FROM users WHERE email = ?`).get('user@user.com');
 if (!userExists) {
   const hashedPassword = bcrypt.hashSync('teste123', 10);
   db.prepare(`
-      INSERT INTO users (name, lastName, cpf, email, password, role)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(
-    'Comprador',
-    'User',
-    '11111111111',
-    'user@user.com',
-    hashedPassword,
-    'USER'  // role USER
+    INSERT INTO users (name, lastName, cpf, street, number,neighborhood, city, state, cep, email, password, role)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
+  `).run(
+    'Comprador', 
+    'User', 
+    '11111111111', 
+    'Rua das Flores', 
+    '200', 
+    'Centro',
+    'Rio de Janeiro', 
+    'RJ', 
+    '20000-000', 
+    'user@user.com', 
+    hashedPassword, 
+    'USER'
   );
 }
+
 db.prepare(`
   CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     scent TEXT NOT NULL,
+    imageUrl TEXT,
     type TEXT NOT NULL,
     size TEXT NOT NULL,
     price REAL NOT NULL
@@ -61,15 +86,15 @@ const row = db.prepare(`SELECT COUNT(*) as count FROM products`).get() as { coun
 const productCount = row.count;
 if (productCount === 0) {
   const insert = db.prepare(`
-      INSERT INTO products (name, description, scent, type, size, price)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO products (name, description, scent, type, size, price, imageUrl)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
 
-  insert.run("Vela Aromática Lavanda", "Vela aromática com essência de lavanda", "Lavanda", "VELA", "200G", 29.90);
-  insert.run("Difusor de Ambiente Baunilha", "Difusor de ambiente com essência de baunilha", "Baunilha", "DIFUSOR", "250ML", 49.90);
-  insert.run("Home Spray Rosas", "Spray para ambientes com fragrância de rosas", "Rosas", "HOME_SPRAY", "500ML", 39.90);
-  insert.run("Essência de Jasmim", "Essência concentrada para aromatizadores", "Jasmim", "ESSENCIA", "45ML", 19.90);
-  insert.run("Vela Aromática Cítrica", "Vela com fragrância cítrica refrescante", "Cítrica", "VELA", "100G", 24.90);
+  insert.run("Vela Aromática Lavanda", "Vela aromática com essência de lavanda", "Lavanda", "VELA", "200G", 89.00, '/uploads/vela.jpg');
+  insert.run("Difusor de Ambiente Baunilha", "Difusor de ambiente com essência de baunilha", "Baunilha", "DIFUSOR", "250ML", 89.00, '/uploads/difusor.jpg');
+  insert.run("Home Spray Rosas", "Spray para ambientes com fragrância de rosas", "Rosas", "HOME_SPRAY", "500ML", 79.00, '/uploads/homespray.jpg');
+  insert.run("Vela Aromática de Baunilha", "Vela aromática com essência de baunulha", "Baunilha", "ESSENCIA", "100G", 69.00, '/uploads/vela1.jpg');
+  insert.run("Vela Aromática Cítrica", "Vela com fragrância cítrica refrescante", "Cítrica", "VELA", "100G", 69.00, '/uploads/vela2.jpg');
 }
 
 db.prepare(`

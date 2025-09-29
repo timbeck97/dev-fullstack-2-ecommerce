@@ -9,5 +9,6 @@ export default interface ProductCard {
   scent: ProductScent;
   type: ProductType;
   size: ProductSize;
+  imageUrl?:string;
   price: string;
 }

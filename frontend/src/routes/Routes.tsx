@@ -23,10 +23,11 @@ const Routes = () => {
                 <Route path="/manage/product" element={<Products />} />
                 <Route path="/manage/product/:id" element={<ProductForm />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<ClientForm />} />
+                <Route path="/register" element={<ClientForm manage={false} formType='USER'/>} />
+                <Route path="/editUser/:id" element={<ClientForm manage={false} formType="ADMIN" />} />
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/users" element={<Users />} />
-                <Route path="/users/manage/:id" element={<UserForm />} />
+                <Route path="/users/manage/:id" element={<ClientForm manage={true} formType="ADMIN" />} />
             
 
             </Route>

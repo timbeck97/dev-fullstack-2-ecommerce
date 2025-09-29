@@ -24,6 +24,7 @@ axiosApi.interceptors.response.use(
   (response) => response, 
   (error) => {
     if (error.response && error.response.data) {
+      console.log(error.response.data)
      alert(error.response.data.message || error.message);
     } else {
       console.error("Erro Axios:", error.message);

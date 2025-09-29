@@ -1,14 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useCart } from "../context/CartContext"; // hook do CartContext
+import { CartProvider, useCart } from "../context/CartContext"; // hook do CartContext
 import { AuthContext } from "../context/AuthContext";
 import { useContext } from "react";
 
 export const Menu = () => {
   const { totalQuantity } = useCart(); // pega a quantidade total do carrinho
   const { user, isAuthenticated, logout } = useContext(AuthContext);
+  const { clearCart } = useCart(); 
   const navigate = useNavigate()
   const handleLogout = ()=>{
     logout();
+    clearCart()
     navigate('/')
   }
   return (
@@ -34,7 +36,7 @@ export const Menu = () => {
               </>
             )}
 
-            {isAuthenticated &&
+            {isAuthenticated && user?.role !== "ADMIN" &&
               <Link to="/orders" title="Meus pedidos" className="text-gray-700 hover:text-gray-900">
                 Meus Pedidos
               </Link>

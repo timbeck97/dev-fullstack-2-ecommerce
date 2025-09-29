@@ -7,13 +7,6 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import CurrencyInput from "react-currency-input-field";
 
-
-
-
-
-
-
-
 export interface Product {
   id?: number;
   name: string;
@@ -22,6 +15,7 @@ export interface Product {
   type: ProductType;
   size: ProductSize;
   price: string;
+  imageUrl?: string; // campo da imagem
 }
 
 export const ProductForm = () => {
@@ -33,45 +27,55 @@ export const ProductForm = () => {
     scent: ProductScent.BERGAMOTA_ALEGRIM,
     type: ProductType.VELA,
     size: ProductSize.UNICO,
-    price: '',
+    price: "",
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
-    if (id && id === "novo") {
-      const fetchedProduct: Product = {
-        name: "",
-        description: "",
-        scent: ProductScent.MANGA_TANGERINA,
-        type: ProductType.DIFUSOR,
-        size: ProductSize.G200,
-        price: '',
-      };
-      setProduct(fetchedProduct);
-    } else {
-      if (id) {
-        fetchProduct(id)
-      }
+    if (id && id !== "novo") {
+      fetchProduct(id);
     }
   }, [id]);
+
   const fetchProduct = async (id: string) => {
     try {
-      const response = await axios.get<Product>("http://localhost:5000/produtos/" + id);
-      console.log('response product', response.data)
-      setProduct({...response.data, price:String(response.data.price)});
+      const response = await axios.get<Product>(`http://localhost:5000/produtos/${id}`);
+      setProduct({ ...response.data, price: String(response.data.price) });
     } catch (err) {
       console.error(err);
     }
   };
+
   const handleSave = async () => {
     try {
-      const response = await axiosApi.post("/produtos", product);
-      console.log("Produto salvo com sucesso:", response.data);
+      const formData = new FormData();
+      formData.append("name", product.name);
+      formData.append("description", product.description);
+      formData.append("scent", product.scent);
+      formData.append("type", product.type);
+      formData.append("size", product.size);
+      formData.append("price", product.price);
+      if (imageFile) formData.append("image", imageFile);
+
+      if (id && id !== "novo") {
+        await axiosApi.put(`/produtos/${id}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        alert("Produto atualizado com sucesso!");
+      } else {
+        await axiosApi.post("/produtos", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        alert("Produto cadastrado com sucesso!");
+      }
+
       navigate("/manage/product");
     } catch (error) {
       console.error("Erro ao salvar produto:", error);
       alert("Erro ao salvar produto, verifique os dados.");
     }
   };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setProduct((prev) => ({
@@ -81,24 +85,41 @@ export const ProductForm = () => {
   };
 
   const handlePriceChange = (value?: string) => {
-    value = value?.replace(',','.');
+    value = value?.replace(",", ".");
     setProduct((prev) => ({
       ...prev,
       price: value || "",
     }));
   };
+
   return (
     <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
-      <button
-        className="mb-4 text-gray-600 hover:text-gray-800 font-medium"
-        onClick={() => navigate("/manage/product")}
-      >
-        Voltar
-      </button>
       <h2 className="text-2xl font-semibold mb-6 text-center">
         {id === "novo" ? "Novo Produto" : "Editar Produto"}
       </h2>
+
       <form className="space-y-4">
+    
+        {product.imageUrl && (
+          <div className="mb-4 flex justify-center">
+            <img
+              src={`http://localhost:5000${product.imageUrl}`}
+              alt={product.name}
+              className="w-full max-h-70 object-contain rounded-xl shadow-md pb-5 px-2"
+            />
+          </div>
+        )}
+
+   
+        <div>
+          <label className="block mb-1 font-medium text-gray-700">Imagem</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImageFile(e.target.files ? e.target.files[0] : null)}
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
 
         <div>
           <label className="block mb-1 font-medium text-gray-700">Nome</label>
@@ -110,7 +131,6 @@ export const ProductForm = () => {
           />
         </div>
 
-
         <div>
           <label className="block mb-1 font-medium text-gray-700">Descrição</label>
           <input
@@ -120,7 +140,6 @@ export const ProductForm = () => {
             className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>
-
 
         <div>
           <label className="block mb-1 font-medium text-gray-700">Aroma</label>
@@ -138,7 +157,6 @@ export const ProductForm = () => {
           </select>
         </div>
 
-
         <div>
           <label className="block mb-1 font-medium text-gray-700">Tipo</label>
           <select
@@ -154,7 +172,6 @@ export const ProductForm = () => {
             ))}
           </select>
         </div>
-
 
         <div>
           <label className="block mb-1 font-medium text-gray-700">Tamanho</label>
@@ -178,7 +195,7 @@ export const ProductForm = () => {
             id="price"
             name="price"
             placeholder="R$ 0,00"
-            value={product.price.replace('.',',')}
+            value={product.price.replace(".", ",")}
             decimalsLimit={2}
             decimalScale={2}
             decimalSeparator=","
@@ -188,7 +205,6 @@ export const ProductForm = () => {
             className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>
-
 
         <button
           type="button"
@@ -200,5 +216,4 @@ export const ProductForm = () => {
       </form>
     </div>
   );
-}
-
+};
