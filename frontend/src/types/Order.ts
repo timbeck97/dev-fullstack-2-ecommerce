@@ -6,6 +6,6 @@ export default interface Order {
     id:number,
     items:OrderItem[],
     orderData:string,
-    user:string,
+    client:string,
     total:number
 }

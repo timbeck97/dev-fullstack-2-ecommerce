@@ -42,6 +42,18 @@ export const Menu = () => {
               </Link>
 
             }
+              {isAuthenticated && user?.role === "ADMIN" &&
+              <Link to="/manage/orders" title="Meus pedidos" className="text-gray-700 hover:text-gray-900">
+                Pedidos
+              </Link>
+
+            }
+             {isAuthenticated && user?.role !== "ADMIN" &&
+              <Link to="/meusDados" title="Meus pedidos" className="text-gray-700 hover:text-gray-900">
+                Meus Dados
+              </Link>
+
+            }
             {isAuthenticated ?
               <button
                   onClick={handleLogout}

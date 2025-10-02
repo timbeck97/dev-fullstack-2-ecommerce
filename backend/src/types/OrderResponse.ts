@@ -5,5 +5,6 @@ export interface OrderResponse {
   orderData: string;
   paymentMethod: string;
   total:number,
+  client:string,
   items: OrderItemResponse[];
 }

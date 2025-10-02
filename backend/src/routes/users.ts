@@ -31,7 +31,7 @@ interface User {
 }
 
 
-function validateUserPayload(body: any, requireRole = false) {
+function validateUserPayload(body: any) {
     const {
         name,
         cpf,
@@ -68,11 +68,6 @@ function validateUserPayload(body: any, requireRole = false) {
     if (password !== confirmPassword) {
         return { valid: false, message: 'As senhas não coincidem' };
     }
-
-    if (requireRole && (!role || role.trim() === '')) {
-        return { valid: false, message: 'Campo role é obrigatório para criação de usuário admin' };
-    }
-
     return { valid: true };
 }
 
@@ -171,7 +166,7 @@ router.post('/me/novo', (req, res) => {
 
 
 router.post('/', authenticateJWT, authorizeRoles('ADMIN'), (req, res) => {
-    const validation = validateUserPayload(req.body, true);
+    const validation = validateUserPayload(req.body);
     if (!validation.valid) {
         return res.status(400).json({ message: validation.message });
     }
@@ -188,7 +183,7 @@ router.post('/', authenticateJWT, authorizeRoles('ADMIN'), (req, res) => {
         cep,
         email,
         password,
-        role,
+        role='USER',
     } = req.body;
 
     const existingUser = db
@@ -250,10 +245,10 @@ router.get('/', authenticateJWT, authorizeRoles('ADMIN'), (req, res) => {
         .all() as User[];
     res.json(users);
 });
-router.put('/:id', authenticateJWT, (req, res) => {
+router.put('/:id', authenticateJWT, authorizeRoles('ADMIN'), (req, res) => {
 
 
-    const  body  = req.body;
+    const body = req.body;
     const { id } = req.params;
 
     if (!id) {
@@ -281,11 +276,69 @@ router.put('/:id', authenticateJWT, (req, res) => {
     db.prepare(
         `
     UPDATE users
-    SET name = ?, lastName = ?, street = ?, number = ?, neighborhood = ?, city = ?, state = ?, cep = ?, email = ?, password = ?
+    SET name = ?, cpf=?, lastName = ?, street = ?, number = ?, neighborhood = ?, city = ?, state = ?, cep = ?, email = ?, password = ?
     WHERE id = ?
   `
     ).run(
         body.name || existingUser.name,
+        body.cpf || existingUser.cpf,
+        body.lastName || existingUser.lastName,
+        body.street || existingUser.street,
+        body.number || existingUser.number,
+        body.neighborhood || existingUser.neighborhood,
+        body.city || existingUser.city,
+        body.state || existingUser.state,
+        body.cep || existingUser.cep,
+        body.email || existingUser.email,
+        hashedPassword,
+        id
+    );
+
+    const updatedUser = db
+        .prepare(
+            `SELECT id, name, lastName, cpf, street, number, neighborhood, city, state, cep, email, role FROM users WHERE id = ?`
+        )
+        .get(id);
+
+    res.json({ message: 'Usuário atualizado com sucesso', user: updatedUser });
+});
+router.put('/editar/meuUsuario', authenticateJWT, (req, res) => {
+    const id = (req as any).user?.id;
+
+    const body = req.body;
+
+
+    if (!id) {
+        return res.status(400).json({ message: 'ID do usuário é obrigatório' });
+    }
+
+    const existingUser = db
+        .prepare(`SELECT * FROM users WHERE id = ?`)
+        .get(id) as User | undefined;
+
+    if (!existingUser) {
+        return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+
+
+    const validation = validateUserPayload(body);
+    if (!validation.valid) {
+        return res.status(400).json({ message: validation.message });
+    }
+
+    const hashedPassword = body.password
+        ? bcrypt.hashSync(body.password, 10)
+        : existingUser.password;
+
+    db.prepare(
+        `
+    UPDATE users
+    SET name = ?,cpf=?, lastName = ?, street = ?, number = ?, neighborhood = ?, city = ?, state = ?, cep = ?, email = ?, password = ?
+    WHERE id = ?
+  `
+    ).run(
+        body.name || existingUser.name,
+        body.cpf || existingUser.cpf,
         body.lastName || existingUser.lastName,
         body.street || existingUser.street,
         body.number || existingUser.number,
@@ -336,6 +389,25 @@ router.get('/completo/:id', authenticateJWT, authorizeRoles('ADMIN'), (req, res)
         .get(id) as User | undefined;
 
     if (!user) return res.status(404).json({ message: 'Usuário não encontrado' });
+
+    res.json(user);
+});
+router.get('/editar/meusDados', authenticateJWT, (req, res) => {
+
+    const userId = (req as any).user?.id;
+
+    const user = db
+        .prepare(
+            `
+      SELECT id, name, lastName, cpf, street, number, neighborhood, city, state, cep, email, role
+      FROM users WHERE id = ?
+    `
+        )
+        .get(userId) as User | undefined;
+
+    if (!user) {
+        return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
 
     res.json(user);
 });

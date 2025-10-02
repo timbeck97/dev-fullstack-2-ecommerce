@@ -6,7 +6,7 @@ import { UserFormData } from "../types/UserFormData";
 
 interface ClientFormProps {
   manage: boolean;
-  formType: 'ADMIN' | 'USER'
+  formType: 'INSERIR' | 'UPDATE_USER' | 'UPDATE_ADMIN'
 }
 
 
@@ -29,7 +29,7 @@ export const ClientForm = ({ manage, formType }: ClientFormProps) => {
     cep: "",
   });
 
- 
+
   const fetchUser = async (userId: string) => {
     try {
       const resp = await axiosApi.get(`/usuarios/completo/${userId}`);
@@ -51,9 +51,36 @@ export const ClientForm = ({ manage, formType }: ClientFormProps) => {
       console.error("Erro ao carregar usuário:", err);
     }
   };
+  const fetchMe = async () => {
+    try {
+      const resp = await axiosApi.get(`/usuarios/editar/meusDados`);
+      const data = resp.data;
+      setUser({
+        name: data.name || "",
+        cpf: data.cpf || "",
+        email: data.email || "",
+        password: "",
+        confirmPassword: "",
+        number: data.number || "",
+        street: data.street || "",
+        neighborhood: data.neighborhood || "",
+        city: data.city || "",
+        state: data.state || "",
+        cep: data.cep || "",
+      });
+    } catch (err) {
+      console.error("Erro ao carregar usuário:", err);
+    }
+  };
 
   useEffect(() => {
-    if (id && id !== "novo") fetchUser(id);
+    if (formType !== 'INSERIR' && id !== 'novo') {
+      if (id && id !== "novo") {
+        fetchUser(id);
+      } else {
+        fetchMe();
+      }
+    }
   }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,29 +97,36 @@ export const ClientForm = ({ manage, formType }: ClientFormProps) => {
     }
 
     try {
-      if (id) {
-        if (formType === 'ADMIN') {
+
+      if (formType === "UPDATE_ADMIN") {
+        if (id && id === 'novo') {
+          await axiosApi.post(`/usuarios`, {
+            ...user,
+            password: user.password || undefined,
+          });
+          navigate('/users')
+        } else {
           await axiosApi.put(`/usuarios/${id}`, {
             ...user,
             password: user.password || undefined,
           });
-        } else {
-          await axiosApi.put(`/usuarios/me/editar`, user);
+          alert('Dados Alterados')
         }
-        alert("Usuário atualizado com sucesso!");
-      } else {
-        if (formType === 'USER') {
-          await axios.post(`http://localhost:5000/usuarios/me/novo`, user);
-          alert("Usuário cadastrado com sucesso!");
-        } else {
-          await axiosApi.post(`/usuarios/${id}`, {
-            ...user,
-            password: user.password || undefined,
-          });
-        }
-
+      } else if (formType === 'INSERIR') {
+        await axios.post(`http://localhost:5000/usuarios/me/novo`, user);
+        alert("Usuário cadastrado com sucesso!");
+      } else if (formType === 'UPDATE_USER') {
+        await axiosApi.put(`/usuarios/editar/meuUsuario`, user);
+        alert('Dados Alterados')
       }
-      navigate("/login");
+
+      if (formType !== 'INSERIR' && id !== 'novo') {
+        if (id && id !== "novo") {
+          fetchUser(id);
+        } else {
+          fetchMe();
+        }
+      }
     } catch (err) {
       console.error("Erro ao salvar usuário:", err);
 
@@ -229,7 +263,7 @@ export const ClientForm = ({ manage, formType }: ClientFormProps) => {
           </div>
 
 
-          <div className="flex flex-col">
+          <div className="flex flex-col col-span-2">
             <label htmlFor="email" className="mb-1 font-medium text-gray-700">
               Email
             </label>
@@ -287,12 +321,12 @@ export const ClientForm = ({ manage, formType }: ClientFormProps) => {
               type="submit"
               className="w-full bg-emerald-600 text-white py-3 rounded-xl hover:bg-emerald-700 transition"
             >
-              {id && id !== "novo" ? "Salvar Alterações" : "Cadastrar"}
+              {(id && id !== "novo" || formType === 'UPDATE_USER') ? "Salvar Alterações" : "Cadastrar"}
             </button>
           </div>
         </form>
 
-        {!manage && (
+        {!manage && (id && id === "novo" || formType === 'INSERIR') && (
           <div className="mt-4 text-center text-sm text-gray-500">
             Já tem uma conta?{" "}
             <a href="/login" className="text-emerald-600 hover:underline">

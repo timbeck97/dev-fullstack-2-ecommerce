@@ -11,6 +11,7 @@ import { ShoppingCart } from "../pages/ShoppingCart";
 import { ClientForm } from "../pages/ClientForm";
 import { ProcessOrder } from "../pages/ProcessOrder";
 import { ProductForm } from "../pages/ProductForm";
+import { ManageOrders } from "../pages/ManageOrders";
 
 const Routes = () => {
     const router = createBrowserRouter(
@@ -21,13 +22,14 @@ const Routes = () => {
                 <Route path="/shoppingcart" element={<ShoppingCart />} />
                 <Route path="/processorder" element={<ProcessOrder />} />
                 <Route path="/manage/product" element={<Products />} />
+                <Route path="/manage/orders" element={<ManageOrders />} />
                 <Route path="/manage/product/:id" element={<ProductForm />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<ClientForm manage={false} formType='USER'/>} />
-                <Route path="/editUser/:id" element={<ClientForm manage={false} formType="ADMIN" />} />
+                <Route path="/register" element={<ClientForm manage={false} formType='INSERIR'/>} />
+                <Route path="/meusDados" element={<ClientForm manage={false} formType="UPDATE_USER" />} />
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/users" element={<Users />} />
-                <Route path="/users/manage/:id" element={<ClientForm manage={true} formType="ADMIN" />} />
+                <Route path="/users/manage/:id" element={<ClientForm manage={true} formType="UPDATE_ADMIN" />} />
             
 
             </Route>

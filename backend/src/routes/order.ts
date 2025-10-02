@@ -67,62 +67,92 @@ router.post("/", authenticateJWT, authorizeRoles("USER"), (req: Request, res: Re
 
 
 router.get("/", authenticateJWT, (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
-    if (!userId) {
-        return res.status(401).json({ message: "Token inválido ou expirado" });
+  const user = (req as any).user;
+  if (!user?.id) {
+    return res.status(401).json({ message: "Token inválido ou expirado" });
+  }
+
+  try {
+    let rows: OrderRow[] = [];
+
+    if (user.role === "ADMIN") {
+      // Admin vê todas as ordens
+      rows = db.prepare(`
+        SELECT 
+          o.id AS orderId,
+          strftime('%d/%m/%Y', o.order_data) AS orderData,
+          o.payment_method AS paymentMethod,
+          o.total,
+          u.name AS client,         
+          oi.id AS orderItemId,
+          oi.quantity,
+          oi.value,
+          p.name AS productName,
+          p.size,
+          p.scent,
+          p.type
+        FROM orders o
+        JOIN users u ON u.id = o.client_id     
+        JOIN order_item oi ON oi.order_id = o.id
+        JOIN products p ON p.id = oi.product_id
+      `).all() as OrderRow[];
+    } else {
+      // Usuário comum vê apenas suas ordens
+      rows = db.prepare<OrderRow>(`
+        SELECT 
+          o.id AS orderId,
+          strftime('%d/%m/%Y', o.order_data) AS orderData,
+          o.payment_method AS paymentMethod,
+          o.total,
+          u.name AS client,
+          oi.id AS orderItemId,
+          oi.quantity,
+          oi.value,
+          p.name AS productName,
+          p.size,
+          p.scent,
+          p.type
+        FROM orders o
+        JOIN users u ON u.id = o.client_id
+        JOIN order_item oi ON oi.order_id = o.id
+        JOIN products p ON p.id = oi.product_id
+        WHERE o.client_id = ?
+      `).all(user.id) as OrderRow[];
     }
 
-    try {
-        const rows = db.prepare(`
-    SELECT 
-        o.id AS orderId,
-        strftime('%d/%m/%Y', o.order_data) AS orderData,
-        o.payment_method AS paymentMethod,
-        o.total,
-        oi.id AS orderItemId,
-        oi.quantity,
-        oi.value,
-        p.name AS productName,
-        p.size,
-        p.scent,
-        p.type
-    FROM orders o
-    JOIN order_item oi ON oi.order_id = o.id
-    JOIN products p ON p.id = oi.product_id
-    WHERE o.client_id = ?
-    `).all(userId) as OrderRow[];
+    // Monta o array de pedidos como antes
+    const orders: OrderResponse[] = rows.reduce((acc: OrderResponse[], row) => {
+      let order = acc.find(o => o.id === row.orderId);
+      if (!order) {
+        order = {
+          id: row.orderId,
+          orderData: row.orderData,
+          paymentMethod: row.paymentMethod,
+          client: row.client,   // adiciona o nome do cliente no objeto
+          items: [],
+          total: row.total
+        };
+        acc.push(order);
+      }
 
-        const orders: OrderResponse[] = rows.reduce((acc: OrderResponse[], row) => {
-            let order = acc.find(o => o.id === row.orderId);
-            if (!order) {
-                order = {
-                    id: row.orderId,
-                    orderData: row.orderData,
-                    paymentMethod: row.paymentMethod,
-                    items: [],
-                    total: row.total
-                };
-                acc.push(order);
-            }
+      order.items.push({
+        id: row.orderItemId,
+        productName: row.productName,
+        size: row.size,
+        scent: row.scent,
+        type: row.type,
+        quantity: row.quantity,
+        value: row.value
+      });
 
-            order.items.push({
-                id: row.orderItemId,
-                productName: row.productName,
-                size: row.size,
-                scent: row.scent,
-                type: row.type,
-                quantity: row.quantity,
-                value: row.value
-            });
+      return acc;
+    }, []);
 
-            return acc;
-        }, []);
-
-        res.json(orders);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Erro ao buscar ordens" });
-    }
+    res.json(orders);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao buscar ordens" });
+  }
 });
 
 

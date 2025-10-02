@@ -10,4 +10,5 @@ export interface OrderRow {
     size: string;
     scent: string;
     type: string;
+    client:string;
 }
