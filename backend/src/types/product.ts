@@ -10,4 +10,6 @@ export default interface Product{
       type: ProductType;
       size: ProductSize;
       price: number;
+      quantity:number;
+      supplierId:number;
 }

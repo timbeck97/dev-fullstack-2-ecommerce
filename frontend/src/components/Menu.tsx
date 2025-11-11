@@ -27,8 +27,14 @@ export const Menu = () => {
           <nav className="flex items-center space-x-6">
             {isAuthenticated && user?.role === "ADMIN" && (
               <>
+               <Link to="/manage/painel" title="Painel" className="text-gray-700 hover:text-gray-900">
+                  Painel do Administrador
+                </Link>
                 <Link to="/manage/product" title="Gerenciar produtos" className="text-gray-700 hover:text-gray-900">
                   Produtos
+                </Link>
+                <Link to="/manage/suppliers" title="Gerenciar fornecedores" className="text-gray-700 hover:text-gray-900">
+                  Fornecedores
                 </Link>
                 <Link to="/users" title="Gerenciar usuários" className="text-gray-700 hover:text-gray-900">
                   Usuários

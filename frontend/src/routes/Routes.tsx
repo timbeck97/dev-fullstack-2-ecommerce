@@ -12,6 +12,9 @@ import { ClientForm } from "../pages/ClientForm";
 import { ProcessOrder } from "../pages/ProcessOrder";
 import { ProductForm } from "../pages/ProductForm";
 import { ManageOrders } from "../pages/ManageOrders";
+import { Suppliers } from "../pages/Suppliers";
+import { SupplierForm } from "../pages/SupplierForm";
+import { ResultPanel } from "../pages/ResultPanel";
 
 const Routes = () => {
     const router = createBrowserRouter(
@@ -22,8 +25,11 @@ const Routes = () => {
                 <Route path="/shoppingcart" element={<ShoppingCart />} />
                 <Route path="/processorder" element={<ProcessOrder />} />
                 <Route path="/manage/product" element={<Products />} />
+                <Route path="/manage/suppliers" element={<Suppliers />} />
+                <Route path="/manage/suppliers/:id" element={<SupplierForm />} />
                 <Route path="/manage/orders" element={<ManageOrders />} />
                 <Route path="/manage/product/:id" element={<ProductForm />} />
+                <Route path="/manage/painel" element={<ResultPanel />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<ClientForm manage={false} formType='INSERIR'/>} />
                 <Route path="/meusDados" element={<ClientForm manage={false} formType="UPDATE_USER" />} />

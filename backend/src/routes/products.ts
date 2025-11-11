@@ -28,11 +28,11 @@ router.post(
   authorizeRoles("ADMIN"),
   upload.single("image"), // multer para receber o arquivo
   (req: Request, res: Response) => {
-    const { name, description, scent, type, size, price } = req.body;
+    const { name, description, scent, type, size, price, supplierId, quantity } = req.body;
     const file = req.file;
 
     // validações
-    if (!name || !description || !scent || !type || !size || price == null) {
+    if (!name || !description || !scent || !type || !size || price == null || supplierId == null || quantity==null) {
       return res.status(400).json({ error: "Todos os campos são obrigatórios" });
     }
 
@@ -49,15 +49,15 @@ router.post(
     }
 
     const imageUrl = file ? `/uploads/${file.filename}` : null;
-    console.log(imageUrl)
+ 
     const result = db
       .prepare(
         `
-      INSERT INTO products (name, description, scent, type, size, price, imageUrl)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO products (name, description, scent, type, size, price, imageUrl, supplierId, quantity)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `
       )
-      .run(name, description, scent, type, size, price, imageUrl);
+      .run(name, description, scent, type, size, price, imageUrl, supplierId, quantity);
 
     const newProduct = db
       .prepare(`SELECT * FROM products WHERE id = ?`)
@@ -96,9 +96,8 @@ router.put(
     const existing = db.prepare(`SELECT * FROM products WHERE id = ?`).get(id) as Product | undefined;
     if (!existing) return res.status(404).json({ error: "Produto não encontrado" });
 
-    const { name, description, scent, type, size, price } = req.body;
+    const { name, description, scent, type, size, price, supplierId, quantity } = req.body;
     const file = req.file;
-
     if (type && !Object.values(ProductType).includes(type)) {
       return res.status(400).json({
         error: `Tipo inválido. Valores permitidos: ${Object.values(ProductType).join(", ")}`,
@@ -117,7 +116,7 @@ router.put(
     db.prepare(
       `
       UPDATE products
-      SET name = ?, description = ?, scent = ?, type = ?, size = ?, price = ?, imageUrl = ?
+      SET name = ?, description = ?, scent = ?, type = ?, size = ?, price = ?, imageUrl = ?, supplierId=?, quantity=?
       WHERE id = ?
     `
     ).run(
@@ -128,6 +127,8 @@ router.put(
       size || existing.size,
       price ?? existing.price,
       imageUrl,
+      supplierId || existing.supplierId,
+      quantity || existing.quantity,
       id
     );
 

@@ -11,59 +11,81 @@ import { OrderResponse } from "../types/OrderResponse";
 const router = Router();
 
 router.post("/", authenticateJWT, authorizeRoles("USER"), (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
-    if (!userId) return res.status(401).json({ message: "Token inválido ou expirado" });
+  const userId = (req as any).user?.id;
+  if (!userId) return res.status(401).json({ message: "Token inválido ou expirado" });
 
-    const { items, paymentData } = req.body as { items: OrderItem[]; paymentData: PaymentData };
+  const { items, paymentData } = req.body as { items: OrderItem[]; paymentData: PaymentData };
 
-    if (!items || items.length === 0) {
-        return res.status(400).json({ message: "Nenhum item enviado" });
+  if (!items || items.length === 0) {
+    return res.status(400).json({ message: "Nenhum item enviado" });
+  }
+
+  try {
+    // Busca os produtos e seus estoques
+    const products = db
+      .prepare(
+        `SELECT id, price, quantity FROM products WHERE id IN (${items.map(() => "?").join(",")})`
+      )
+      .all(...items.map((i) => i.productId)) as { id: number; price: number; quantity: number }[];
+
+    if (products.length !== items.length) {
+      return res.status(400).json({ message: "Algum produto não existe" });
     }
 
-    try {
+    // Verifica estoque disponível
+    for (const item of items) {
+      const product = products.find((p) => p.id === item.productId);
+      if (!product) {
+        return res.status(400).json({ message: `Produto ${item.productId} não encontrado.` });
+      }
 
-        const products = db.prepare(`SELECT id, price FROM products WHERE id IN (${items.map(() => "?").join(",")})`).all(
-            ...items.map((i) => i.productId)
-        ) as { id: number; price: number }[];
-
-        if (products.length !== items.length) {
-            return res.status(400).json({ message: "Algum produto não existe" });
-        }
-
-
-        let total = 0;
-        const itemsWithPrice = items.map((item) => {
-            const product = products.find((p) => p.id === item.productId)!;
-            const itemTotal = product.price * item.quantity;
-            total += itemTotal;
-            return { ...item, value: product.price };
+      if (product.quantity < item.quantity) {
+        return res.status(400).json({
+          message: `Estoque insuficiente para o produto ${product.id}. Disponível: ${product.quantity}`,
         });
+      }
+    }
 
+    // Calcula total e inclui preços atualizados
+    let total = 0;
+    const itemsWithPrice = items.map((item) => {
+      const product = products.find((p) => p.id === item.productId)!;
+      const itemTotal = product.price * item.quantity;
+      total += itemTotal;
+      return { ...item, value: product.price };
+    });
 
-        const insertOrder = db.prepare(`
+    // Cria pedido
+    const insertOrder = db.prepare(`
       INSERT INTO orders (client_id, order_data, total, payment_method)
       VALUES (?, datetime('now'), ?, ?)
     `);
 
-        const info = insertOrder.run(userId, total, "CREDIT_CARD");
-        const orderId = info.lastInsertRowid as number;
+    const info = insertOrder.run(userId, total, "CREDIT_CARD");
+    const orderId = info.lastInsertRowid as number;
 
-
-        const insertOrderItem = db.prepare(`
+    // Cria os itens do pedido
+    const insertOrderItem = db.prepare(`
       INSERT INTO order_item (product_id, order_id, value, quantity)
       VALUES (?, ?, ?, ?)
     `);
 
-        for (const item of itemsWithPrice) {
-            insertOrderItem.run(item.productId, orderId, item.value, item.quantity);
-        }
+    const updateStock = db.prepare(`
+      UPDATE products SET quantity = quantity - ? WHERE id = ?
+    `);
 
-        res.status(201).json({ orderId, total, items: itemsWithPrice });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Erro ao salvar a ordem" });
+    for (const item of itemsWithPrice) {
+      insertOrderItem.run(item.productId, orderId, item.value, item.quantity);
+      updateStock.run(item.quantity, item.productId); // Atualiza estoque
     }
+
+    res.status(201).json({ orderId, total, items: itemsWithPrice });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erro ao salvar a ordem" });
+  }
 });
+
 
 
 router.get("/", authenticateJWT, (req: Request, res: Response) => {

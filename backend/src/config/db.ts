@@ -69,7 +69,29 @@ if (!userExists) {
     'USER'
   );
 }
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS suppliers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    phone TEXT,
+    cnpj TEXT,
+    address TEXT,
+    email TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )
+`).run();
 
+const supplierCount = db.prepare(`SELECT COUNT(*) as count FROM suppliers`).get() as { count: number };
+if (supplierCount.count === 0) {
+  const insertSupplier = db.prepare(`
+    INSERT INTO suppliers (name, phone, email, cnpj, address)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+
+  insertSupplier.run('Essências do Brasil', '(11) 99999-1111', 'contato@essenciasbr.com', '88104328000107','Porto Alegre');
+  insertSupplier.run('Aromas Naturais', '(21) 98888-2222', 'vendas@aromasnaturais.com','63051187000172',' Novo Hamburgo');
+  insertSupplier.run('Casa das Velas', '(41) 97777-3333', 'suporte@casadasvelas.com', '27363272000102','Canoas');
+}
 db.prepare(`
   CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,22 +101,28 @@ db.prepare(`
     imageUrl TEXT,
     type TEXT NOT NULL,
     size TEXT NOT NULL,
-    price REAL NOT NULL
+    quantity INTEGER,
+    price REAL NOT NULL,
+    supplierId INTEGER,
+    FOREIGN KEY (supplierId) REFERENCES suppliers(id)
   )
 `).run();
 const row = db.prepare(`SELECT COUNT(*) as count FROM products`).get() as { count: number };
-const productCount = row.count;
-if (productCount === 0) {
-  const insert = db.prepare(`
-      INSERT INTO products (name, description, scent, type, size, price, imageUrl)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `);
+if (row.count === 0) {
+const suppliers = db.prepare(`SELECT id FROM suppliers`).all() as { id: number }[];
+const supplierIds = suppliers.map(s => s.id);
 
-  insert.run("Vela Aromática Lavanda", "Vela aromática com essência de lavanda", "Lavanda", "VELA", "200G", 89.00, '/uploads/vela.jpg');
-  insert.run("Difusor de Ambiente Baunilha", "Difusor de ambiente com essência de baunilha", "Baunilha", "DIFUSOR", "250ML", 89.00, '/uploads/difusor.jpg');
-  insert.run("Home Spray Rosas", "Spray para ambientes com fragrância de rosas", "Rosas", "HOME_SPRAY", "500ML", 79.00, '/uploads/homespray.jpg');
-  insert.run("Vela Aromática de Baunilha", "Vela aromática com essência de baunulha", "Baunilha", "ESSENCIA", "100G", 69.00, '/uploads/vela1.jpg');
-  insert.run("Vela Aromática Cítrica", "Vela com fragrância cítrica refrescante", "Cítrica", "VELA", "100G", 69.00, '/uploads/vela2.jpg');
+const getRandomSupplier = () => supplierIds[Math.floor(Math.random() * supplierIds.length)];
+
+const insert = db.prepare(`     INSERT INTO products (name, description, scent, type, size, price, imageUrl,quantity, supplierId)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?,? )
+  `);
+
+insert.run("Vela Aromática Lavanda", "Vela aromática com essência de lavanda", "Lavanda", "VELA", "200G", 89.00, '/uploads/vela.jpg',2, getRandomSupplier());
+insert.run("Difusor de Ambiente Baunilha", "Difusor de ambiente com essência de baunilha", "Baunilha", "DIFUSOR", "250ML", 89.00, '/uploads/difusor.jpg',15, getRandomSupplier());
+insert.run("Home Spray Rosas", "Spray para ambientes com fragrância de rosas", "Rosas", "HOME_SPRAY", "500ML", 79.00, '/uploads/homespray.jpg', 13, getRandomSupplier());
+insert.run("Vela Aromática de Baunilha", "Vela aromática com essência de baunilha", "Baunilha", "ESSENCIA", "100G", 69.00, '/uploads/vela1.jpg', 3, getRandomSupplier());
+insert.run("Vela Aromática Cítrica", "Vela com fragrância cítrica refrescante", "Cítrica", "VELA", "100G", 69.00, '/uploads/vela2.jpg', 4, getRandomSupplier());
 }
 
 db.prepare(`
