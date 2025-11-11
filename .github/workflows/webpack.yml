@@ -33,6 +33,8 @@ jobs:
 
       - name: Testar backend
         working-directory: backend/
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: npx jest
 
       # Docker Login
