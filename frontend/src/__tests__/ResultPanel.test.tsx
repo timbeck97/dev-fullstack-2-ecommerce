@@ -20,32 +20,32 @@ describe("ResultPanel Component", () => {
 
   test("exibe dados corretamente após carregar", async () => {
     mockedAxios.get
-      .mockResolvedValueOnce({ data: { totalVendasMes: 2500 } }) // total vendas
+      .mockResolvedValueOnce({ data: { totalVendasMes: 2500 } }) 
       .mockResolvedValueOnce({
-        data: { name: "Café", totalVendido: 120, totalValor: 3600 },
-      }) // produto mais vendido
+        data: { name: "Difusor", totalVendido: 120, totalValor: 3600 },
+      }) 
       .mockResolvedValueOnce({
         data: [
-          { id: 1, name: "Açúcar", quantity: 3 },
-          { id: 2, name: "Leite", quantity: 2 },
+          { id: 1, name: "Vela 1", quantity: 3 },
+          { id: 2, name: "Home Spray", quantity: 2 },
         ],
-      }); // baixo estoque
+      }); 
 
     render(<ResultPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/R\$ 2500.00/)).toBeInTheDocument();
-      expect(screen.getByText("Café")).toBeInTheDocument();
-      expect(screen.getByText("Açúcar")).toBeInTheDocument();
-      expect(screen.getByText("Leite")).toBeInTheDocument();
+      expect(screen.getByText("Difusor")).toBeInTheDocument();
+      expect(screen.getByText("Vela 1")).toBeInTheDocument();
+      expect(screen.getByText("Home Spray")).toBeInTheDocument();
     });
   });
 
   test("exibe mensagem se não houver produto mais vendido", async () => {
     mockedAxios.get
-      .mockResolvedValueOnce({ data: { totalVendasMes: 1000 } }) // total vendas
-      .mockRejectedValueOnce(new Error("Erro")) // produto mais vendido
-      .mockResolvedValueOnce({ data: [] }); // baixo estoque
+      .mockResolvedValueOnce({ data: { totalVendasMes: 1000 } }) 
+      .mockRejectedValueOnce(new Error("Erro")) 
+      .mockResolvedValueOnce({ data: [] }); 
 
     render(<ResultPanel />);
 
@@ -60,7 +60,7 @@ describe("ResultPanel Component", () => {
     mockedAxios.get
       .mockResolvedValueOnce({ data: { totalVendasMes: 1500 } })
       .mockResolvedValueOnce({
-        data: { name: "Café", totalVendido: 100, totalValor: 2000 },
+        data: { name: "Difusor", totalVendido: 100, totalValor: 2000 },
       })
       .mockResolvedValueOnce({ data: [] });
 
@@ -75,7 +75,7 @@ describe("ResultPanel Component", () => {
     mockedAxios.get
       .mockResolvedValueOnce({ data: { totalVendasMes: 1200 } })
       .mockResolvedValueOnce({
-        data: { name: "Café", totalVendido: 10, totalValor: 100 },
+        data: { name: "Difusor", totalVendido: 10, totalValor: 100 },
       })
       .mockResolvedValueOnce({ data: [] });
 
