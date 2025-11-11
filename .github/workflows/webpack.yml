@@ -33,7 +33,7 @@ jobs:
 
       - name: Testar backend
         working-directory: backend/
-        run: npm test --if-present
+        run: npx jest
 
       # Docker Login
       - name: Docker Login
