@@ -50,8 +50,6 @@ jobs:
         with:
           context: backend/
           push: true
-          cache-from: type=registry,ref=timbeck97/loja-backend:cache
-          cache-to: type=registry,ref=timbeck97/loja-backend:cache,mode=max
           tags: timbeck97/loja-backend:latest, timbeck97/loja-backend:${{ github.run_number }}
 
       # ===============================
