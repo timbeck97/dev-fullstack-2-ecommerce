@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - prod
 
 jobs:
   build:
@@ -13,6 +14,10 @@ jobs:
 
       - name: Checkout repositório
         uses: actions/checkout@v3
+
+      # ===============================
+      # BACKEND
+      # ===============================
 
       - name: Setup Node.js (backend)
         uses: actions/setup-node@v3
@@ -37,51 +42,63 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: npx jest
 
-   
+
+
       - name: Docker Login
+        if: github.ref == 'refs/heads/prod'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_LOGIN }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
      
+
       - name: Build e Push Docker image BACKEND
+        if: github.ref == 'refs/heads/prod'
         uses: docker/build-push-action@v5
         with:
           context: backend/
           push: true
-          tags: timbeck97/loja-backend:latest, timbeck97/loja-backend:${{ github.run_number }}
+          tags: |
+            timbeck97/loja-backend:latest
+            timbeck97/loja-backend:${{ github.run_number }}
+
 
       # ===============================
-      # FRONTEND - React
+      # FRONTEND
       # ===============================
-      # - name: Setup Node.js (frontend)
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: 18
 
-      # - name: Cache npm (frontend)
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: frontend/node_modules
-      #     key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-node-
+      - name: Setup Node.js (frontend)
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-      # - name: Instalar dependências frontend
-      #   working-directory: frontend/
-      #   run: npm install
+      - name: Cache npm (frontend)
+        uses: actions/cache@v3
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-      # - name: Build frontend
-      #   working-directory: frontend/
-      #   run: npm run build
+      - name: Instalar dependências frontend
+        working-directory: frontend/
+        run: npm install
 
-      # - name: Build e Push Docker image FRONTEND
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: frontend/
-      #     push: true
-      #     cache-from: type=registry,ref=timbeck1997/loja-frontend:cache
-      #     cache-to: type=registry,ref=timbeck1997/loja-frontend:cache,mode=max
-      #     tags: timbeck1997/loja-frontend:latest, timbeck1997/loja-frontend:${{ github.run_number }}
+      - name: Build frontend
+        working-directory: frontend/
+        run: npm run build
 
+
+
+      - name: Build e Push Docker image FRONTEND
+        if: github.ref == 'refs/heads/prod'
+        uses: docker/build-push-action@v5
+        with:
+          context: frontend/
+          push: true
+          cache-from: type=registry,ref=timbeck1997/loja-frontend:cache
+          cache-to: type=registry,ref=timbeck1997/loja-frontend:cache,mode=max
+          tags: |
+            timbeck1997/loja-frontend:latest
+            timbeck1997/loja-frontend:${{ github.run_number }}
