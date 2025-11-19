@@ -23,6 +23,7 @@ describe("🧾 Testes das rotas de Fornecedores (/suppliers)", () => {
 
   describe("POST /suppliers", () => {
     it("deve criar um fornecedor com sucesso (201)", async () => {
+      //moca o retorno de id no insert no banco
       mockDb.prepare.mockReturnValueOnce({
         run: jest.fn().mockReturnValue({ lastInsertRowid: 10 }),
       });
@@ -44,11 +45,11 @@ describe("🧾 Testes das rotas de Fornecedores (/suppliers)", () => {
       const res = await request(app)
         .post("/suppliers")
         .send({ email: "semnome@email.com" });
-
+      //nome obrigatorio
       expect(res.status).toBe(400);
       expect(res.body.message).toMatch(/obrigatório/);
     });
-
+    //simula um erro no insert do banco (teste de tratamento de erro)
     it("deve retornar 500 em erro de banco", async () => {
       mockDb.prepare.mockImplementationOnce(() => { throw new Error("DB error"); });
 
