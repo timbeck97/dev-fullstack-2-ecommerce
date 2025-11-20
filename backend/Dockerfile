@@ -1,15 +1,11 @@
-FROM node:20-alpine
-
-RUN apk add --no-cache python3 make g++
+FROM node:20
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-
 RUN npm install
 
 COPY . .
 
-EXPOSE 8080
-
-CMD ["node", "index.js"]
+EXPOSE 5000
+CMD ["npx", "ts-node", "src/index.ts"]

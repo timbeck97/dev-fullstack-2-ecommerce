@@ -1,0 +1,26 @@
+services:
+  backend:
+    # image: timbeck97/loja-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: loja-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - JWT_SECRET=5236585932456321
+
+  frontend:
+    #image: timbeck97/loja-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: loja-frontend
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001
+    depends_on:
+      - backend
