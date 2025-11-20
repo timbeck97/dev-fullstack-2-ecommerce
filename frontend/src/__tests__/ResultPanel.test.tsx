@@ -20,7 +20,7 @@ describe("ResultPanel Component", () => {
 
   test("exibe dados corretamente após carregar", async () => {
     mockedAxios.get
-      .mockResolvedValueOnce({ data: { totalVendasMes: 2500 } }) 
+      .mockResolvedValueOnce({ data: { totalVendasMes: 2522200 } }) 
       .mockResolvedValueOnce({
         data: { name: "Difusor", totalVendido: 120, totalValor: 3600 },
       }) 

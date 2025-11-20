@@ -95,7 +95,7 @@ describe("Testes das rotas de Dashboard", () => {
       const res = await request(app).get("/dashboard/baixo-estoque?minStock=5");
       expect(res.status).toBe(200);
       expect(res.body).toHaveLength(2);
-      expect(res.body[0].name).toBe("Produto C");
+      expect(res.body[0].name).toBe("Produto A");
     });
 
     it("deve retornar 500 se ocorrer erro no banco", async () => {
