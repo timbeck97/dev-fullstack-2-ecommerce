@@ -97,8 +97,6 @@ jobs:
         with:
           context: frontend/
           push: true
-          cache-from: type=registry,ref=timbeck1997/loja-frontend:cache
-          cache-to: type=registry,ref=timbeck1997/loja-frontend:cache,mode=max
           tags: |
             timbeck1997/loja-frontend:latest
             timbeck1997/loja-frontend:${{ github.run_number }}
