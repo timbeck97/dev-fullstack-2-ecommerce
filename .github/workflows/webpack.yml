@@ -19,49 +19,49 @@ jobs:
       # BACKEND
       # ===============================
 
-      # - name: Setup Node.js (backend)
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: 18
+      - name: Setup Node.js (backend)
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-      # - name: Cache npm (backend)
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: backend/node_modules
-      #     key: ${{ runner.os }}-node-${{ hashFiles('backend/package-lock.json') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-node-
+      - name: Cache npm (backend)
+        uses: actions/cache@v3
+        with:
+          path: backend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('backend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-      # - name: Instalar dependências backend
-      #   working-directory: backend/
-      #   run: npm install
+      - name: Instalar dependências backend
+        working-directory: backend/
+        run: npm install
 
-      # - name: Testar backend
-      #   working-directory: backend/
-      #   env:
-      #     JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      #   run: npx jest
+      - name: Testar backend
+        working-directory: backend/
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: npx jest
 
 
 
-      # - name: Docker Login
-      #   if: github.ref == 'refs/heads/prod'
-      #   uses: docker/login-action@v3
-      #   with:
-      #     username: ${{ secrets.DOCKER_LOGIN }}
-      #     password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Docker Login
+        if: github.ref == 'refs/heads/prod'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_LOGIN }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
      
 
-      # - name: Build e Push Docker image BACKEND
-      #   if: github.ref == 'refs/heads/prod'
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: backend/
-      #     push: true
-      #     tags: |
-      #       timbeck97/loja-backend:latest
-      #       timbeck97/loja-backend:${{ github.run_number }}
+      - name: Build e Push Docker image BACKEND
+        if: github.ref == 'refs/heads/prod'
+        uses: docker/build-push-action@v5
+        with:
+          context: backend/
+          push: true
+          tags: |
+            timbeck97/loja-backend:latest
+            timbeck97/loja-backend:${{ github.run_number }}
 
 
       # ===============================
