@@ -32,9 +32,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Instalar dependências backend
-        working-directory: backend/
-        run: npm install
+      # - name: Instalar dependências backend
+      #   working-directory: backend/
+      #   run: npm install
 
       - name: Testar backend
         working-directory: backend/
