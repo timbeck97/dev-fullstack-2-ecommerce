@@ -33,7 +33,7 @@ export const ResultPanel = () => {
             const vendasRes = await axiosApi.get("/dashboard/total-vendas-mes");
             setTotalVendasMes(vendasRes.data.totalVendasMes);
             await buscarProdutoMaisVendido();
-            const estoqueRes = await axiosApi.get("/dashboard/baixo-estoque?minStock=5");
+            const estoqueRes = await axiosApi.get("/dashboard/baixo-estoque?minStock=3");
             setProdutosBaixoEstoque(estoqueRes.data);
         } catch (err) {
             console.error("Erro ao carregar dashboard:", err);

@@ -1,9 +1,6 @@
 services:
   backend:
-    # image: timbeck97/loja-backend:latest
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: timbeck97/loja-backend:latest
     container_name: loja-backend
     restart: always
     ports:
@@ -12,10 +9,7 @@ services:
       - JWT_SECRET=5236585932456321
 
   frontend:
-    #image: timbeck97/loja-frontend:latest
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: timbeck97/loja-frontend:latest
     container_name: loja-frontend
     restart: always
     ports:

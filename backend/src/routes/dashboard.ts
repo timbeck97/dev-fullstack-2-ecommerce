@@ -57,7 +57,7 @@ router.get("/produto-mais-vendido", authenticateJWT, authorizeRoles("ADMIN"), (r
 
 router.get("/baixo-estoque", authenticateJWT, authorizeRoles("ADMIN"), (req: Request, res: Response) => {
     try {
-        const minStock = Number(req.query.minStock) || 5;
+        const minStock = Number(req.query.minStock) || 3;
 
         const products = db.prepare(`
       SELECT id, name, quantity

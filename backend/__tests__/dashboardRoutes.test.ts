@@ -92,7 +92,7 @@ describe("Testes das rotas de Dashboard", () => {
         ]),
       });
 
-      const res = await request(app).get("/dashboard/baixo-estoque?minStock=5");
+      const res = await request(app).get("/dashboard/baixo-estoque?minStock=3");
       expect(res.status).toBe(200);
       expect(res.body).toHaveLength(2);
       expect(res.body[0].name).toBe("Produto A");
